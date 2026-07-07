@@ -31,6 +31,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env.production.local
 .env
 
 # database
@@ -47,3 +48,6 @@ cookies.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
+.env*

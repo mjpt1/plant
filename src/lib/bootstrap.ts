@@ -1,5 +1,5 @@
 import { Role } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 const DEMO_ACCOUNTS = [

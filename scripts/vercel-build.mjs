@@ -6,7 +6,7 @@ function run(command) {
 
 run("npx prisma generate");
 
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL) {
   console.log("Applying database schema...");
   run("npx prisma db push");
 } else {

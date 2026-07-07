@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const checks: Record<string, boolean | string | number> = {
     appUrl: resolveAppUrl(),
-    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasDatabaseUrl: !!(process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL),
     hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
     isVercel: !!process.env.VERCEL,
   };
@@ -17,7 +17,7 @@ export async function GET() {
   let databaseError: string | undefined;
   let userCount: number | undefined;
 
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL) {
     try {
       await checkDatabaseConnection();
       database = true;
