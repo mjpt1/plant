@@ -2,9 +2,119 @@
 
 ![گیاه‌یار PlantCare](./public/images/social-cover.png)
 
-A production-ready Progressive Web App for plant identification, health checks, Q&A forum, social network, and care calendar — with full Persian (RTL/Jalali) and English (LTR/Gregorian) support.
+**فارسی** · اپلیکیشن وب پیشرفته برای شناسایی گیاه، بررسی سلامت، انجمن پرسش‌وپاسخ، شبکه اجتماعی و تقویم مراقبت — با پشتیبانی کامل از فارسی (راست‌به‌چپ/جلالی) و انگلیسی (چپ‌به‌راست/میلادی).
 
-## Features
+**English** · A production-ready Progressive Web App for plant identification, health checks, Q&A forum, social network, and care calendar — with full Persian (RTL/Jalali) and English (LTR/Gregorian) support.
+
+---
+
+## فارسی
+
+### امکانات
+
+- **اسکنر گیاه** — عکس با دوربین یا آپلود، با نتیجه فوری برای گونه و سلامت
+- **بررسی سلامت و بیماری** — وضعیت، مراحل درمان، نکات پیشگیری، تحلیل خاک و رطوبت
+- **فید اجتماعی** — پست، لایک، نظر و دنبال‌کردن کاربران
+- **انجمن پرسش‌وپاسخ** — پرسش در دسته‌های خاک، آفت، آبیاری و بیماری
+- **تقویم مراقبت** — تقویم جلالی (فا) / میلادی (انگلیسی) با یادآور
+- **کتابخانه گیاهان** — کاتالوگ بیش از ۲٬۰۰۰ گونه با نام‌های دوزبانه
+- **چندزبانه** — فارسی و انگلیسی با تعویض زبان
+- **حالت تاریک/روشن** — تم هماهنگ با سیستم
+- **PWA** — قابل نصب با کش سرویس‌ورکر
+
+### فناوری‌ها
+
+- Next.js 14 (App Router) + TypeScript
+- Tailwind CSS + رابط شیشه‌ای
+- Prisma ORM + PostgreSQL
+- NextAuth (ورود با رمز / OAuth)
+- Cloudinary برای آپلود تصویر
+- date-fns-jalali + jalaali-js برای تقویم دوگانه
+
+### راه‌اندازی
+
+#### ۱. نصب وابستگی‌ها
+
+```bash
+npm install
+```
+
+#### ۲. تنظیم محیط
+
+```bash
+cp .env.example .env
+```
+
+| متغیر | توضیح |
+|-------|--------|
+| `DATABASE_URL` | رشته اتصال PostgreSQL (پورت **۵۴۳۳** با Docker) |
+| `NEXTAUTH_URL` | آدرس اپ (مثلاً `http://localhost:3000`) |
+| `NEXTAUTH_SECRET` | کلید تصادفی برای نشست JWT |
+| `ANALYSIS_PROVIDER` | `primary` یا `fallback` |
+| `ANALYSIS_PRIMARY_KEY` | کلید اصلی سرویس تحلیل تصویر |
+| `ANALYSIS_FALLBACK_KEY` | کلید ثانویه (اختیاری) |
+| `CLOUDINARY_*` | آپلود تصویر (اختیاری) |
+| `GOOGLE_*` / `GITHUB_*` | ورود OAuth (اختیاری) |
+
+#### ۳. اجرای PostgreSQL
+
+```bash
+docker compose up -d
+```
+
+پایگاه داده روی پورت **۵۴۳۳** اجرا می‌شود تا با Postgres محلی روی ۵۴۳۲ تداخل نداشته باشد.
+
+#### ۴. راه‌اندازی پایگاه داده و کاتالوگ
+
+```bash
+npm run setup
+```
+
+یا مرحله‌به‌مرحله:
+
+```bash
+npm run db:push
+npm run catalog:seed
+npm run catalog:fix-fa
+npm run db:seed
+```
+
+#### ۵. اجرای سرور توسعه
+
+```bash
+npm run dev
+```
+
+[http://localhost:3000](http://localhost:3000) را باز کنید.
+
+### حساب‌های دمو
+
+| نقش | ایمیل | رمز |
+|-----|-------|-----|
+| کاربر | `demo@plantcare.ir` | `demo1234` |
+| مدیر | `admin@plantcare.ir` | `admin1234` |
+| کارشناس | `expert@plantcare.ir` | `expert1234` |
+
+### اسکریپت‌ها
+
+| دستور | توضیح |
+|-------|--------|
+| `npm run dev` | اجرای سرور توسعه |
+| `npm run dev:clean` | پاک‌کردن کش `.next` و اجرای dev |
+| `npm run build` | بیلد production |
+| `npm run test` | تست واحد (Vitest) |
+| `npm run test:e2e` | تست end-to-end (Playwright) |
+| `npm run setup` | db:push + کاتالوگ + seed |
+
+### تصویر شاخص مخزن
+
+فایل `public/images/social-cover.png` را در GitHub به‌عنوان تصویر پیش‌نمایش اجتماعی قرار دهید (Settings → General → Social preview).
+
+---
+
+## English
+
+### Features
 
 - **Plant Scanner** — Camera or upload with instant species and health insights
 - **Health & Disease Check** — Status, treatment steps, prevention tips, soil and moisture notes
@@ -16,7 +126,7 @@ A production-ready Progressive Web App for plant identification, health checks, 
 - **Dark/Light Mode** — System-aware theme toggle
 - **PWA** — Installable with service worker caching
 
-## Tech Stack
+### Tech Stack
 
 - Next.js 14 (App Router) + TypeScript
 - Tailwind CSS + glassmorphic UI
@@ -25,15 +135,15 @@ A production-ready Progressive Web App for plant identification, health checks, 
 - Cloudinary image uploads
 - date-fns-jalali + jalaali-js for dual calendar
 
-## Getting Started
+### Getting Started
 
-### 1. Install dependencies
+#### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configure environment
+#### 2. Configure environment
 
 ```bash
 cp .env.example .env
@@ -50,7 +160,7 @@ cp .env.example .env
 | `CLOUDINARY_*` | Image uploads (optional) |
 | `GOOGLE_*` / `GITHUB_*` | OAuth providers (optional) |
 
-### 3. Start PostgreSQL
+#### 3. Start PostgreSQL
 
 ```bash
 docker compose up -d
@@ -58,7 +168,7 @@ docker compose up -d
 
 Database runs on **port 5433** to avoid conflicts with a local Postgres on 5432.
 
-### 4. Set up database & catalog
+#### 4. Set up database & catalog
 
 ```bash
 npm run setup
@@ -73,7 +183,7 @@ npm run catalog:fix-fa
 npm run db:seed
 ```
 
-### 5. Run development server
+#### 5. Run development server
 
 ```bash
 npm run dev
@@ -81,7 +191,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Demo Accounts
+### Demo Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -89,7 +199,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | Admin | `admin@plantcare.ir` | `admin1234` |
 | Expert | `expert@plantcare.ir` | `expert1234` |
 
-## Scripts
+### Scripts
 
 | Command | Description |
 |---------|-------------|
@@ -100,10 +210,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run test:e2e` | End-to-end tests (Playwright) |
 | `npm run setup` | DB push + catalog + seed |
 
-## Repository Cover
+### Repository Cover
 
 Use `public/images/social-cover.png` as the GitHub repository social preview image (Settings → General → Social preview).
 
-## License
+---
+
+## License / مجوز
 
 MIT
