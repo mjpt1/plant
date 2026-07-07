@@ -1,3 +1,5 @@
+import { resolveAppUrl } from "@/lib/app-url";
+
 export const siteConfig = {
   name: "PlantCare",
   nameFa: "گیاه‌یار",
@@ -6,7 +8,7 @@ export const siteConfig = {
     "Identify plants, diagnose diseases, connect with gardeners, and manage your plant care schedule. شناسایی گیاه، تشخیص بیماری و مدیریت مراقبت.",
   descriptionFa:
     "شناسایی گیاه، تشخیص بیماری، ارتباط با باغبانان و مدیریت برنامه مراقبت از گیاهان.",
-  url: process.env.NEXTAUTH_URL || "https://plantcare.ir",
+  url: resolveAppUrl(),
   locale: "en_US",
   themeColor: "#10b981",
   keywords: [

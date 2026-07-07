@@ -1,7 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
+import { ensureAuthEnv } from "@/lib/app-url";
 import { prisma } from "@/lib/prisma";
 import { buildAuthProviders } from "@/lib/oauth/build-providers";
+
+ensureAuthEnv();
 
 async function syncUserTokenFields(userId: string) {
   return prisma.user.findUnique({

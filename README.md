@@ -106,6 +106,34 @@ npm run dev
 | `npm run test:e2e` | تست end-to-end (Playwright) |
 | `npm run setup` | db:push + کاتالوگ + seed |
 
+### استقرار روی Vercel
+
+۱. مخزن را در [Vercel](https://vercel.com) به GitHub وصل کنید (`mjpt1/plant`).
+
+۲. **Storage → Postgres** (یا Neon/Supabase) را به پروژه وصل کنید تا `DATABASE_URL` تنظیم شود.
+
+۳. در **Settings → Environment Variables** این مقادیر را اضافه کنید:
+
+| متغیر | مقدار |
+|-------|--------|
+| `NEXTAUTH_SECRET` | یک رشته تصادفی طولانی (مثلاً `openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | آدرس production مثل `https://your-app.vercel.app` |
+| `SETUP_SECRET` | رمز یک‌بارمصرف برای ساخت حساب‌های دمو |
+
+۴. **Deploy** کنید (یا Redeploy).
+
+۵. وضعیت را بررسی کنید: `https://your-app.vercel.app/api/health`
+
+۶. اگر `userCount` صفر است، حساب‌های دمو را بسازید:
+
+```bash
+curl -X POST "https://your-app.vercel.app/api/setup/bootstrap" -H "x-setup-secret: YOUR_SETUP_SECRET"
+```
+
+۷. با `demo@plantcare.ir` / `demo1234` وارد شوید.
+
+**علت رایج خطای ورود:** نبود `DATABASE_URL`، نبود `NEXTAUTH_SECRET`، `NEXTAUTH_URL` اشتباه، یا seed نشدن پایگاه داده.
+
 ### تصویر شاخص مخزن
 
 فایل `public/images/social-cover.png` را در GitHub به‌عنوان تصویر پیش‌نمایش اجتماعی قرار دهید (Settings → General → Social preview).
@@ -209,6 +237,34 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run test` | Unit tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (Playwright) |
 | `npm run setup` | DB push + catalog + seed |
+
+### Deploy on Vercel
+
+1. Import the GitHub repo (`mjpt1/plant`) on [Vercel](https://vercel.com).
+
+2. Attach **Storage → Postgres** (or Neon/Supabase) so `DATABASE_URL` is set.
+
+3. Add these in **Settings → Environment Variables**:
+
+| Variable | Value |
+|----------|--------|
+| `NEXTAUTH_SECRET` | Long random string |
+| `NEXTAUTH_URL` | Production URL, e.g. `https://your-app.vercel.app` |
+| `SETUP_SECRET` | One-time secret for demo user bootstrap |
+
+4. **Deploy** (or Redeploy).
+
+5. Check: `https://your-app.vercel.app/api/health`
+
+6. If `userCount` is 0, bootstrap demo users:
+
+```bash
+curl -X POST "https://your-app.vercel.app/api/setup/bootstrap" -H "x-setup-secret: YOUR_SETUP_SECRET"
+```
+
+7. Sign in with `demo@plantcare.ir` / `demo1234`.
+
+**Common login failures:** missing `DATABASE_URL`, missing `NEXTAUTH_SECRET`, wrong `NEXTAUTH_URL`, or database not seeded.
 
 ### Repository Cover
 
