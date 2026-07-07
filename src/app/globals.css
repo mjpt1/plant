@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 140 20% 98%;
+    --foreground: 140 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 140 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 140 30% 12%;
+    --primary: 152 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 140 20% 94%;
+    --secondary-foreground: 140 30% 20%;
+    --muted: 140 15% 94%;
+    --muted-foreground: 140 10% 45%;
+    --accent: 152 40% 92%;
+    --accent-foreground: 152 76% 26%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 140 15% 88%;
+    --input: 140 15% 88%;
+    --ring: 152 76% 36%;
+    --radius: 0.75rem;
+    --card-glass: rgba(255, 255, 255, 0.72);
+    --card-border: rgba(255, 255, 255, 0.35);
+    --emerald-glow: rgba(16, 185, 129, 0.15);
+  }
+
+  .dark {
+    --background: 140 25% 6%;
+    --foreground: 140 20% 92%;
+    --card: 140 20% 10%;
+    --card-foreground: 140 20% 92%;
+    --popover: 140 20% 10%;
+    --popover-foreground: 140 20% 92%;
+    --primary: 152 70% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 140 15% 14%;
+    --secondary-foreground: 140 20% 90%;
+    --muted: 140 15% 14%;
+    --muted-foreground: 140 10% 60%;
+    --accent: 152 30% 16%;
+    --accent-foreground: 152 60% 75%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 140 15% 18%;
+    --input: 140 15% 18%;
+    --ring: 152 70% 42%;
+    --card-glass: rgba(15, 25, 15, 0.75);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --emerald-glow: rgba(16, 185, 129, 0.1);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html[dir="rtl"] body {
+    font-family: "Vazirmatn", "Tahoma", system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] body {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-[var(--card-glass)] backdrop-blur-xl border border-[var(--card-border)];
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-lg shadow-emerald-500/5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
+           bg-gradient-to-r from-emerald-500 to-green-600 text-white font-medium
+           shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40
+           hover:scale-[1.02] active:scale-[0.98] transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
+           glass font-medium hover:bg-white/20 active:scale-[0.98]
+           transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl glass border border-white/10
+           focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+           placeholder:text-muted-foreground
+           transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-healthy {
+    @apply badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+  }
+
+  .badge-critical {
+    @apply badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .scan-ring {
+    @apply absolute inset-0 border-2 border-emerald-400/50 rounded-2xl;
+    animation: scan-pulse 2s ease-in-out infinite;
+  }
+
+  .scan-line {
+    @apply absolute start-4 end-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent;
+    animation: scan-sweep 2.5s ease-in-out infinite;
+  }
+}
+
+@keyframes scan-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scan-sweep {
+  0% {
+    top: 10%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 90%;
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "گیاه‌یار | PlantCare",
+  "short_name": "گیاه‌یار",
+  "description": "شناسایی گیاه، تشخیص بیماری و مدیریت مراقبت",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8faf8",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "fa",
+  "categories": ["lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scan Plant",
+      "short_name": "Scan",
+      "url": "/scan",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "My Plants",
+      "short_name": "Plants",
+      "url": "/plants",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

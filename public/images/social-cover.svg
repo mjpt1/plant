@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-label="¯Ì'GÌ'1 PlantCare">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecfdf5"/>
+      <stop offset="45%" stop-color="#d1fae5"/>
+      <stop offset="100%" stop-color="#6ee7b7"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#047857" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <circle cx="1080" cy="120" r="180" fill="#a7f3d0" opacity="0.45"/>
+  <circle cx="180" cy="520" r="220" fill="#bbf7d0" opacity="0.35"/>
+  <g transform="translate(860 150)" filter="url(#shadow)">
+    <path d="M120 40 C40 110 10 220 30 330 C50 420 120 470 200 470 C280 470 350 420 370 330 C390 220 360 110 280 40 C240 80 200 100 200 100 C200 100 160 80 120 40 Z" fill="url(#leaf)"/>
+    <path d="M200 120 L200 420" stroke="#ecfdf5" stroke-width="14" stroke-linecap="round"/>
+    <path d="M200 180 C150 160 110 175 90 220 C130 210 165 220 200 250" fill="#10b981"/>
+    <path d="M200 240 C250 220 290 235 310 280 C270 270 235 280 200 310" fill="#10b981"/>
+  </g>
+  <text x="90" y="250" font-family="Segoe UI, Tahoma, sans-serif" font-size="72" font-weight="700" fill="#065f46">¯Ì'GÌ'1</text>
+  <text x="90" y="320" font-family="Segoe UI, Tahoma, sans-serif" font-size="48" font-weight="600" fill="#047857">PlantCare</text>
+  <text x="92" y="390" font-family="Segoe UI, Tahoma, sans-serif" font-size="28" fill="#166534">4F'3'ÌÌ ¯Ì'G · E1'B(* · ,'E9G (':('F'F</text>
+  <text x="92" y="430" font-family="Segoe UI, Tahoma, sans-serif" font-size="24" fill="#15803d">Plant ID · Care Calendar · Community · Q&amp;A</text>
+  <rect x="90" y="470" width="220" height="56" rx="16" fill="#10b981"/>
+  <text x="200" y="507" text-anchor="middle" font-family="Segoe UI, Tahoma, sans-serif" font-size="22" font-weight="600" fill="white">Progressive Web App</text>
+</svg>
