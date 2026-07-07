@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const checks: Record<string, boolean | string> = {
+  const checks: Record<string, boolean | string | number> = {
     appUrl: resolveAppUrl(),
     hasDatabaseUrl: !!process.env.DATABASE_URL,
     hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
