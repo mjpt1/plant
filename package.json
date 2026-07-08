@@ -1,7 +1,15 @@
 {
-  "name": "plantcare",
+  "name": "giahyar",
   "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjpt1/plant.git"
+  },
+  "homepage": "https://plant-two-psi.vercel.app",
+  "bugs": {
+    "url": "https://github.com/mjpt1/plant/issues"
+  },
   "scripts": {
     "dev": "next dev -p 3000",
     "dev:clean": "node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true})}catch(e){}\" && next dev -p 3000",
@@ -21,6 +29,7 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "catalog:import": "npx tsx prisma/import-catalog.ts",
     "catalog:seed": "npx tsx prisma/seed-catalog.ts",
+    "catalog:seed:force": "npx tsx prisma/seed-catalog.ts --force",
     "catalog:fix-fa": "npx tsx prisma/fix-persian-names.ts",
     "setup": "npm run db:push && npm run catalog:seed && npm run db:seed",
     "postinstall": "prisma generate"

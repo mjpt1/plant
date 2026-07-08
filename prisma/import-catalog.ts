@@ -1,7 +1,11 @@
 /**
- * Downloads plant data from:
- * - PlantSolve API (113 houseplants with detailed care) — CC BY-NC 4.0
- * - bripatch/plant-variety-database (1972 varieties) — CC BY 4.0
+ * Builds the plant catalog from open databases:
+ * - PlantSolve API (detailed houseplants) — CC BY-NC 4.0
+ * - bripatch/plant-variety-database — CC BY 4.0
+ * - WCVP / Kew (World Checklist of Vascular Plants) — CC BY 4.0
+ *   Successor to The Plant List + IPNI taxonomy
+ * - netplant.ir + imp.ac.ir Persian/medicinal reference names
+ *
  * Run: npm run catalog:import
  */
 import { writeFileSync, mkdirSync, existsSync } from "fs";
@@ -11,6 +15,10 @@ import {
   getCategoryFa,
   mapWaterRequirement,
 } from "../src/data/plantNames";
+import type { CatalogEntry } from "./lib/catalog-entry";
+import { dedupeCatalog, parseCsvLine, slugify } from "./lib/catalog-entry";
+import { importWcvp } from "./import-wcvp";
+import { importPersianSources } from "./import-persian-sources";
 
 const PLANTSOLVE_INDEX =
   "https://www.plantsolve.com/api/v1/plants/index.json";
@@ -18,61 +26,6 @@ const PLANTSOLVE_PLANT = (slug: string) =>
   `https://www.plantsolve.com/api/v1/plants/${slug}.json`;
 const BRIPATCH_CSV =
   "https://raw.githubusercontent.com/bripatch/plant-variety-database/main/data/varieties.csv";
-
-interface CatalogEntry {
-  externalId: string;
-  slug: string;
-  nameEn: string;
-  nameFa: string;
-  scientificName: string | null;
-  category: string;
-  categoryFa: string;
-  description: string | null;
-  sunRequirement: string | null;
-  waterRequirement: string | null;
-  soilType: string | null;
-  soilPh: string | null;
-  difficulty: string | null;
-  wateringGuide: string | null;
-  lightGuide: string | null;
-  fertilizerGuide: string | null;
-  soilGuide: string | null;
-  toxicity: string | null;
-  isIndoor: boolean;
-  isContainerFriendly: boolean;
-  usdaZoneMin: number | null;
-  usdaZoneMax: number | null;
-  imageUrl: string | null;
-  source: string;
-  rawData: string | null;
-}
-
-function parseCsvLine(line: string): string[] {
-  const result: string[] = [];
-  let current = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      inQuotes = !inQuotes;
-    } else if (ch === "," && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else {
-      current += ch;
-    }
-  }
-  result.push(current);
-  return result;
-}
-
-function slugify(text: string, prefix = ""): string {
-  const base = text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  return prefix ? `${prefix}-${base}` : base;
-}
 
 async function fetchPlantSolve(): Promise<CatalogEntry[]> {
   console.log("Fetching PlantSolve index...");
@@ -209,20 +162,34 @@ async function fetchBripatch(): Promise<CatalogEntry[]> {
 }
 
 async function main() {
-  const outDir = join(process.cwd(), "prisma", "data");
-  if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+  const dataDir = join(process.cwd(), "prisma", "data");
+  if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
 
-  const [plantSolve, bripatch] = await Promise.all([
+  console.log("=== گیاه‌یار catalog import ===\n");
+
+  const [plantSolve, bripatch, wcvp, persian] = await Promise.all([
     fetchPlantSolve(),
     fetchBripatch(),
+    importWcvp(dataDir),
+    Promise.resolve(importPersianSources(dataDir)),
   ]);
 
-  const catalog = [...plantSolve, ...bripatch];
-  const outPath = join(outDir, "plant-catalog.json");
-  writeFileSync(outPath, JSON.stringify(catalog, null, 0));
-  console.log(`\nSaved ${catalog.length} plants to ${outPath}`);
-  console.log(`  PlantSolve: ${plantSolve.length}`);
-  console.log(`  Bripatch:   ${bripatch.length}`);
+  const merged = dedupeCatalog([
+    ...plantSolve,
+    ...bripatch,
+    ...persian,
+    ...wcvp,
+  ]);
+
+  const outPath = join(dataDir, "plant-catalog.json");
+  writeFileSync(outPath, JSON.stringify(merged, null, 0));
+
+  console.log(`\nSaved ${merged.length} unique plants to ${outPath}`);
+  console.log(`  PlantSolve:  ${plantSolve.length}`);
+  console.log(`  Bripatch:    ${bripatch.length}`);
+  console.log(`  WCVP (Kew):  ${wcvp.length}`);
+  console.log(`  Persian/IMP: ${persian.length}`);
+  console.log(`  Sources: The Plant List → WCVP, IPNI, netplant.ir, imp.ac.ir`);
 }
 
 main().catch(console.error);

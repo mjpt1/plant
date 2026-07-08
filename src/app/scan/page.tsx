@@ -27,6 +27,7 @@ import { MAX_IMAGE_BYTES } from "@/lib/image-validation";
 import { compressImageDataUrl, isPersistedImageUrl } from "@/lib/image-compress";
 import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 import { cn } from "@/lib/utils";
+import { localizePlantName } from "@/lib/plant-locale";
 import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { formatDate } from "@/utils/dateHelper";
 import { toast } from "sonner";
@@ -40,6 +41,17 @@ type ScanStep = "capture" | "analyzing" | "results";
 type ResultTab = "plant" | "health" | "care" | "treatment";
 
 const ANALYSIS_STEPS = ["uploading", "identifying", "diagnosing", "generating"] as const;
+
+function getScanPlantName(
+  plant: PlantAnalysis["plant"] | undefined,
+  locale: "en" | "fa"
+): string {
+  if (!plant) return "—";
+  if (locale === "fa") {
+    return plant.commonNameFa || plant.commonName || plant.commonNameEn || "—";
+  }
+  return plant.commonNameEn || plant.commonName || plant.commonNameFa || "—";
+}
 
 const IMAGE_TYPES: { id: ImageScanType; labelEn: string; labelFa: string }[] = [
   { id: "full_plant", labelEn: "Full plant", labelFa: "کل گیاه" },
@@ -642,7 +654,7 @@ export default function ScanPage() {
                       />
                       <div className="p-2">
                         <p className="text-xs font-medium truncate">
-                          {scan.plant?.commonName || "—"}
+                          {getScanPlantName(scan.plant, locale)}
                         </p>
                         <div className="flex items-center justify-between gap-1 mt-1">
                           <Badge
@@ -751,15 +763,53 @@ export default function ScanPage() {
           {activeTab === "plant" && (
             <Card className="glass-card border-0">
               <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">{result.plant.commonName}</CardTitle>
-                <p className="text-muted-foreground italic text-sm sm:text-base">
-                  {result.plant.scientificName}
-                </p>
-                <p className="text-sm text-muted-foreground">{result.plant.family}</p>
+                <CardTitle className="text-xl sm:text-2xl">
+                  {getScanPlantName(result.plant, locale)}
+                </CardTitle>
+                {result.plant.scientificName && (
+                  <p className="text-muted-foreground italic text-sm sm:text-base">
+                    <span className="not-italic text-xs text-muted-foreground/80 me-1">
+                      {t.scan.results.scientificName}:
+                    </span>
+                    {result.plant.scientificName}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {result.plant.family && (
+                    <Badge variant="secondary" className="font-normal">
+                      {t.scan.results.family}: {result.plant.family}
+                    </Badge>
+                  )}
+                  {result.plant.category && (
+                    <Badge variant="outline" className="font-normal">
+                      {t.scan.results.category}: {result.plant.category}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground pt-1">
                   {t.scan.results.confidence}: {formatPercent(result.plant.confidence)}
                 </p>
               </CardHeader>
+              {(result.plant.description || result.plant.uses) && (
+                <CardContent className="space-y-4 pt-0">
+                  {result.plant.description && (
+                    <div>
+                      <h4 className="font-medium mb-1 text-sm">{t.scan.results.description}</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
+                        {result.plant.description}
+                      </p>
+                    </div>
+                  )}
+                  {result.plant.uses && (
+                    <div>
+                      <h4 className="font-medium mb-1 text-sm">{t.scan.results.uses}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {result.plant.uses}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              )}
             </Card>
           )}
 

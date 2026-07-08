@@ -1,6 +1,12 @@
 # گیاه‌یار
 
+[![GitHub](https://img.shields.io/github/stars/mjpt1/plant?style=social)](https://github.com/mjpt1/plant)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
+[![Deploy with Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://plant-two-psi.vercel.app)
+
 ![گیاه‌یار](./public/images/social-cover.png)
+
+**مخزن:** [github.com/mjpt1/plant](https://github.com/mjpt1/plant) · **نسخه زنده:** [plant-two-psi.vercel.app](https://plant-two-psi.vercel.app)
 
 **فارسی** · اپلیکیشن وب پیشرفته برای شناسایی گیاه، بررسی سلامت، انجمن پرسش‌وپاسخ، شبکه اجتماعی و تقویم مراقبت — با پشتیبانی کامل از فارسی (راست‌به‌چپ/جلالی) و انگلیسی (چپ‌به‌راست/میلادی).
 
@@ -17,7 +23,7 @@
 - **فید اجتماعی** — پست، لایک، نظر و دنبال‌کردن کاربران
 - **انجمن پرسش‌وپاسخ** — پرسش در دسته‌های خاک، آفت، آبیاری و بیماری
 - **تقویم مراقبت** — تقویم جلالی (فا) / میلادی (انگلیسی) با یادآور
-- **کتابخانه گیاهان** — کاتالوگ بیش از ۲٬۰۰۰ گونه با نام‌های دوزبانه
+- **کتابخانه گیاهان** — کاتالوگ بیش از ۲۶٬۰۰۰ گونه (WCVP/Kew، PlantSolve، Bripatch، netplant، IMP)
 - **چندزبانه** — فارسی و انگلیسی با تعویض زبان
 - **حالت تاریک/روشن** — تم هماهنگ با سیستم
 - **PWA** — قابل نصب با کش سرویس‌ورکر
@@ -105,6 +111,21 @@ npm run dev
 | `npm run test` | تست واحد (Vitest) |
 | `npm run test:e2e` | تست end-to-end (Playwright) |
 | `npm run setup` | db:push + کاتالوگ + seed |
+| `npm run catalog:import` | دانلود و ادغام داده از WCVP، PlantSolve، Bripatch، netplant، IMP |
+| `npm run catalog:seed` | بارگذاری `plant-catalog.json` در دیتابیس |
+| `npm run catalog:seed:force` | بازسازی کامل کاتالوگ از JSON |
+
+### منابع داده کاتالوگ
+
+| منبع | نقش |
+|------|-----|
+| [WCVP / Kew](https://sftp.kew.org/pub/data-repositories/WCVP/) | جایگزین The Plant List — ~۲۵٬۰۰۰ گونه پذیرفته‌شده |
+| [IPNI](https://www.ipni.org/) | فهرست بین‌المللی نام‌های گیاهان (در WCVP ادغام شده) |
+| [PlantSolve](https://www.plantsolve.com/) | ۱۱۳ گیاه آپارتمانی با راهنمای مراقبت |
+| [Bripatch](https://github.com/bripatch/plant-variety-database) | ~۲٬۰۰۰ گونه باغبانی |
+| [netplant.ir](https://www.netplant.ir/) | نام‌های فارسی و داده اکولوژیک ایران |
+| [imp.ac.ir](http://imp.ac.ir/IMP/Home/Plant) | گیاهان دارویی ایران |
+| [MMPND](https://en.wikipedia.org/wiki/Multilingual_Multiscript_Plant_Name_Database) | نام‌های چندزبانه (مرجع) |
 
 ### استقرار روی Vercel
 
@@ -149,7 +170,7 @@ curl -X POST "https://your-app.vercel.app/api/setup/bootstrap" -H "x-setup-secre
 - **Social Feed** — Posts, likes, comments, follow users
 - **Q&A Forum** — Ask questions by category (soil, pest, watering, disease)
 - **Care Calendar** — Jalali calendar (fa) / Gregorian calendar (en) with reminders
-- **Plant Library** — 2,000+ species catalog with bilingual names
+- **Plant Library** — 26,000+ species catalog (WCVP/Kew, PlantSolve, Bripatch, netplant.ir, imp.ac.ir)
 - **i18n** — Persian (RTL) and English (LTR) with language switcher
 - **Dark/Light Mode** — System-aware theme toggle
 - **PWA** — Installable with service worker caching
@@ -265,6 +286,10 @@ curl -X POST "https://your-app.vercel.app/api/setup/bootstrap" -H "x-setup-secre
 7. Sign in with `demo@plantcare.ir` / `demo1234`.
 
 **Common login failures:** missing `DATABASE_URL`, missing `NEXTAUTH_SECRET`, wrong `NEXTAUTH_URL`, or database not seeded.
+
+### حمایت / GitHub Sponsors
+
+اگر این پروژه برایتان مفید بود، می‌توانید از طریق [GitHub Sponsors](https://github.com/sponsors/mjpt1) از توسعهٔ آن حمایت کنید.
 
 ### Repository Cover
 

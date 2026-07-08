@@ -87,6 +87,46 @@ export const PERSIAN_PLANT_NAMES: Record<string, string> = {
   "Cherokee Purple": "گوجه Cherokee Purple",
 };
 
+/** Persian common names keyed by scientific (Latin) name */
+export const PERSIAN_SCIENTIFIC_NAMES: Record<string, string> = {
+  "Monstera deliciosa": "مانسترا",
+  "Epipremnum aureum": "پوتوس",
+  "Sansevieria trifasciata": "سانسوریا",
+  "Chlorophytum comosum": "گل عنکبوتی",
+  "Spathiphyllum wallisii": "لیلی صلح",
+  "Ficus elastica": "فیکوس الاستیکا",
+  "Ficus lyrata": "فیکوس لیره",
+  "Zamioculcas zamiifolia": "زامیوکولکاس",
+  "Salvia officinalis": "مریم‌گلی",
+  "Mentha piperita": "نعناع فلفلی",
+  "Rosmarinus officinalis": "رزماری",
+  "Thymus vulgaris": "آویشن",
+  "Ocimum basilicum": "ریحان",
+  "Matricaria chamomilla": "بابونه",
+  "Calendula officinalis": "آفتاب‌پرست",
+  "Lavandula angustifolia": "اسطوخودوس",
+  "Aloe vera": "آلوئه ورا",
+  "Nigella sativa": "سیاه‌دانه",
+  "Crocus sativus": "زعفران",
+  "Punica granatum": "انار",
+  "Ficus carica": "انجیر",
+  "Olea europaea": "زیتون",
+  "Rosa damascena": "گل محمدی",
+  "Jasminum officinale": "یاسمن",
+  "Pelargonium graveolens": "گل شمعدانی",
+  "Bunium persicum": "زیره کوهی",
+  "Ferula assa-foetida": "انگدان",
+  "Trachyspermum ammi": "نجودان",
+  "Ziziphus jujuba": "عناب",
+  "Morus alba": "توت سفید",
+  "Juglans regia": "گردو",
+  "Pistacia vera": "پسته",
+  "Prunus dulcis": "بادام",
+  "Spinacia oleracea": "اسفناج",
+  "Beta vulgaris": "چغندر",
+  "Daucus carota": "هویج",
+};
+
 const WORD_FA: Record<string, string> = {
   tomato: "گوجه",
   pepper: "فلفل",
@@ -226,7 +266,18 @@ function translateByWords(nameEn: string): string | null {
   return parts.join(" ").replace(/\s+/g, " ").trim();
 }
 
-export function getPersianName(nameEn: string, category?: string): string {
+export function getPersianName(
+  nameEn: string,
+  category?: string,
+  scientificName?: string
+): string {
+  if (scientificName) {
+    const sciKey = Object.keys(PERSIAN_SCIENTIFIC_NAMES).find(
+      (k) => k.toLowerCase() === scientificName.toLowerCase()
+    );
+    if (sciKey) return PERSIAN_SCIENTIFIC_NAMES[sciKey];
+  }
+
   if (PERSIAN_PLANT_NAMES[nameEn]) return PERSIAN_PLANT_NAMES[nameEn];
 
   const key = Object.keys(PERSIAN_PLANT_NAMES).find(
@@ -236,6 +287,11 @@ export function getPersianName(nameEn: string, category?: string): string {
 
   const byWords = translateByWords(nameEn);
   if (byWords) return byWords;
+
+  if (/^[A-Z][a-z]+(?:\s+[a-z]+)+$/.test(nameEn.trim())) {
+    const cat = category && CATEGORY_FA[category];
+    return cat ? `${cat} (${nameEn.trim()})` : nameEn.trim();
+  }
 
   const transliterated = transliterateLatinToPersian(nameEn);
   if (transliterated && transliterated !== nameEn.toLowerCase()) {

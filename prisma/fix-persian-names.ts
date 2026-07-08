@@ -1,24 +1,34 @@
 /**
- * Updates nameFa for catalog entries where Persian name equals English name.
+ * Updates nameFa for catalog entries with missing or transliterated Persian names.
  * Run: npm run catalog:fix-fa
  */
 import { PrismaClient } from "@prisma/client";
-import { getPersianName } from "../src/data/plantNames";
+import { resolveBilingualNames } from "../src/lib/plant-locale";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const plants = await prisma.plantCatalog.findMany({
-    select: { id: true, nameEn: true, nameFa: true, category: true },
+    select: {
+      id: true,
+      nameEn: true,
+      nameFa: true,
+      scientificName: true,
+      category: true,
+    },
   });
 
   const updates: Array<{ id: string; nameFa: string }> = [];
 
   for (const p of plants) {
-    if (p.nameFa !== p.nameEn) continue;
-    const fa = getPersianName(p.nameEn, p.category);
-    if (fa === p.nameEn) continue;
-    updates.push({ id: p.id, nameFa: fa });
+    const { nameFa } = resolveBilingualNames(
+      p.nameEn,
+      p.nameFa,
+      p.scientificName,
+      p.category
+    );
+    if (nameFa === p.nameFa) continue;
+    updates.push({ id: p.id, nameFa });
   }
 
   console.log(`Updating ${updates.length} of ${plants.length} catalog entries...`);

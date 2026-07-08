@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { applyCarePlan } from "@/lib/plantCare";
 import { toJsonValue } from "@/lib/jsonFields";
 import { plantAnalysisSchema } from "@/types/analysis";
-import { getPersianName } from "@/data/plantNames";
+import { resolveBilingualNames } from "@/lib/plant-locale";
 import { normalizePlantHealthStatus } from "@/lib/healthStatus";
 import { apiError } from "@/lib/api-error";
 import {
@@ -98,12 +98,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ scanId: scan.id });
     }
 
-    const commonName = data.plant.commonName;
+    const bilingual = resolveBilingualNames(
+      data.plant.commonNameEn || data.plant.commonName,
+      data.plant.commonNameFa || data.plant.commonName,
+      data.plant.scientificName,
+      data.plant.category
+    );
+
     const plant = await prisma.plant.create({
       data: {
         userId: user.id,
-        nameEn: commonName,
-        nameFa: getPersianName(commonName),
+        nameEn: bilingual.nameEn,
+        nameFa: bilingual.nameFa,
         scientificName: data.plant.scientificName,
         imageUrl: storedImageUrl,
         healthStatus: normalizePlantHealthStatus(data.health.status),

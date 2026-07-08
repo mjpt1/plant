@@ -31,6 +31,15 @@ interface CatalogDetail {
   category: string;
   categoryFa: string;
   description: string | null;
+  displayName?: string;
+  displayCategory?: string;
+  displayDescription?: string | null;
+  displayDifficulty?: string | null;
+  displayWateringGuide?: string | null;
+  displayLightGuide?: string | null;
+  displayFertilizerGuide?: string | null;
+  displaySoilGuide?: string | null;
+  displayToxicity?: string | null;
   sunRequirement: string | null;
   waterRequirement: string | null;
   soilType: string | null;
@@ -64,11 +73,11 @@ export default function CatalogDetailPage() {
   const [adopted, setAdopted] = useState(false);
 
   const fetchPlant = useCallback(async () => {
-    const res = await fetch(`/api/catalog/${slug}`);
+    const res = await fetch(`/api/catalog/${slug}?locale=${locale}`);
     const data = await res.json();
     if (res.ok) setPlant(data.plant);
     setLoading(false);
-  }, [slug]);
+  }, [slug, locale]);
 
   useEffect(() => {
     fetchPlant();
@@ -111,10 +120,10 @@ export default function CatalogDetailPage() {
   }
 
   const careItems = [
-    { icon: Droplets, label: t.scan.results.watering, value: plant.wateringGuide },
-    { icon: Sun, label: t.scan.results.light, value: plant.lightGuide || plant.sunRequirement },
-    { icon: Leaf, label: t.scan.results.fertilizer, value: plant.fertilizerGuide },
-    { icon: Shovel, label: t.scan.results.soilType, value: plant.soilGuide || plant.soilType },
+    { icon: Droplets, label: t.scan.results.watering, value: plant.displayWateringGuide || plant.wateringGuide },
+    { icon: Sun, label: t.scan.results.light, value: plant.displayLightGuide || plant.lightGuide || plant.sunRequirement },
+    { icon: Leaf, label: t.scan.results.fertilizer, value: plant.displayFertilizerGuide || plant.fertilizerGuide },
+    { icon: Shovel, label: t.scan.results.soilType, value: plant.displaySoilGuide || plant.soilGuide || plant.soilType },
   ];
 
   const extraItems = [
@@ -138,13 +147,13 @@ export default function CatalogDetailPage() {
         {plant.imageUrl && (
           <img
             src={plant.imageUrl}
-            alt={locale === "fa" ? plant.nameFa : plant.nameEn}
+            alt={plant.displayName || (locale === "fa" ? plant.nameFa : plant.nameEn)}
             className="w-full max-h-72 object-cover"
           />
         )}
         <div className="p-6">
           <span className="badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs mb-2">
-            {locale === "fa" ? plant.categoryFa : plant.category}
+            {plant.displayCategory || (locale === "fa" ? plant.categoryFa : plant.category)}
           </span>
           {plant.isUserSubmitted && (
             <span className="badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs mb-2 ms-2">
@@ -152,17 +161,17 @@ export default function CatalogDetailPage() {
             </span>
           )}
           <h1 className="text-2xl font-bold">
-            {locale === "fa" ? plant.nameFa : plant.nameEn}
+            {plant.displayName || (locale === "fa" ? plant.nameFa : plant.nameEn)}
           </h1>
           <p className="text-gray-500 italic">{plant.scientificName}</p>
-          {plant.difficulty && (
+          {(plant.displayDifficulty || plant.difficulty) && (
             <p className="text-sm text-gray-500 mt-1">
-              {t.catalog.difficulty}: {plant.difficulty}
+              {t.catalog.difficulty}: {plant.displayDifficulty || plant.difficulty}
             </p>
           )}
-          {plant.description && (
+          {(plant.displayDescription || plant.description) && (
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed">
-              {plant.description}
+              {plant.displayDescription || plant.description}
             </p>
           )}
         </div>
@@ -210,7 +219,7 @@ export default function CatalogDetailPage() {
           <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
           <div>
             <p className="text-sm font-medium">{t.catalog.toxicity}</p>
-            <p className="text-xs text-gray-500 mt-1">{plant.toxicity}</p>
+            <p className="text-xs text-gray-500 mt-1">{plant.displayToxicity || plant.toxicity}</p>
           </div>
         </div>
       )}

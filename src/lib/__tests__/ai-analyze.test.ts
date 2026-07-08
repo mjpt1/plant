@@ -47,6 +47,7 @@ describe("isDemoAnalysisMode", () => {
     delete process.env.ANALYSIS_FALLBACK_KEY;
     delete process.env.OPENAI_API_KEY;
     delete process.env.GEMINI_API_KEY;
+    delete process.env.PLANTNET_API_KEY;
 
     expect(isDemoAnalysisMode()).toBe(true);
 

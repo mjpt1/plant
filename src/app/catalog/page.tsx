@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocaleFormat } from "@/hooks/useLocaleFormat";
+import { localizePlantName, localizeCategory } from "@/lib/plant-locale";
 import { cn } from "@/lib/utils";
 
 interface CatalogPlant {
@@ -150,7 +151,7 @@ export default function CatalogPage() {
               category === c.category ? "bg-emerald-500 text-white" : "glass"
             )}
           >
-            {locale === "fa" ? c.categoryFa : c.category} ({c.count})
+            {localizeCategory(c.category, c.categoryFa, locale)} ({c.count})
           </button>
         ))}
       </div>
@@ -176,7 +177,7 @@ export default function CatalogPage() {
                   {plant.imageUrl ? (
                     <img
                       src={plant.imageUrl}
-                      alt={locale === "fa" ? plant.nameFa : plant.nameEn}
+                      alt={localizePlantName(plant, locale)}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -192,7 +193,7 @@ export default function CatalogPage() {
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-sm">
-                    {locale === "fa" ? plant.nameFa : plant.nameEn}
+                    {localizePlantName(plant, locale)}
                   </h3>
                   <p className="text-xs text-gray-500 italic truncate">
                     {plant.scientificName}

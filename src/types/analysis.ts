@@ -10,9 +10,14 @@ export const healthStatusSchema = z.enum([
 export const plantAnalysisSchema = z.object({
   plant: z.object({
     commonName: z.string(),
+    commonNameEn: z.string().optional().default(""),
+    commonNameFa: z.string().optional().default(""),
     scientificName: z.string(),
     family: z.string(),
     confidence: z.number().min(0).max(100),
+    description: z.string().optional().default(""),
+    category: z.string().optional().default(""),
+    uses: z.string().optional().default(""),
   }),
   health: z.object({
     status: healthStatusSchema,

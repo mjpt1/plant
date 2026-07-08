@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getExpertInsight } from "@/lib/catalog-extra";
+import {
+  getLocaleFromRequest,
+  localizeCatalogPlant,
+  localizePlantText,
+} from "@/lib/plant-locale";
+import type { Locale } from "@/i18n";
 
 function expandGuide(
   short: string | null,
   fallback: string | null,
-  template: (v: string) => string
+  locale: Locale,
+  templates: { en: (v: string) => string; fa: (v: string) => string }
 ): string | null {
-  if (short && short.length > 20) return short;
-  if (fallback) return template(fallback);
-  return short;
+  if (short && short.length > 20) {
+    return localizePlantText(short, locale);
+  }
+  if (fallback) {
+    const template = locale === "fa" ? templates.fa : templates.en;
+    return localizePlantText(template(fallback), locale);
+  }
+  return short ? localizePlantText(short, locale) : null;
 }
 
 function parseExtra(rawData: unknown) {
@@ -43,10 +55,11 @@ function parseExtra(rawData: unknown) {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
+    const locale = getLocaleFromRequest(request);
     const plant = await prisma.plantCatalog.findUnique({
       where: { slug: params.slug },
     });
@@ -64,33 +77,57 @@ export async function GET(
     const wateringGuide = expandGuide(
       plant.wateringGuide,
       plant.waterRequirement,
-      (v) =>
-        `Water when the top layer of soil feels dry. This plant typically needs ${v} watering — adjust for your climate and pot size.`
+      locale,
+      {
+        en: (v) =>
+          `Water when the top layer of soil feels dry. This plant typically needs ${v} watering — adjust for your climate and pot size.`,
+        fa: (v) =>
+          `وقتی لایهٔ بالایی خاک خشک شد آبیاری کنید. این گیاه معمولاً به آبیاری ${v} نیاز دارد — با توجه به آب‌وهوا و اندازهٔ گلدان تنظیم کنید.`,
+      }
     );
     const lightGuide = expandGuide(
       plant.lightGuide,
       plant.sunRequirement,
-      (v) =>
-        `Place in ${v} light. Avoid harsh direct sun unless the species requires it.`
+      locale,
+      {
+        en: (v) =>
+          `Place in ${v} light. Avoid harsh direct sun unless the species requires it.`,
+        fa: (v) =>
+          `در نور ${v} قرار دهید. از آفتاب مستقیم شدید پرهیز کنید مگر گونه به آن نیاز داشته باشد.`,
+      }
     );
     const soilGuide = expandGuide(
       plant.soilGuide,
       plant.soilType,
-      (v) => `Use ${v}. Ensure the pot has drainage holes.`
+      locale,
+      {
+        en: (v) => `Use ${v}. Ensure the pot has drainage holes.`,
+        fa: (v) => `از ${v} استفاده کنید. گلدان باید سوراخ زهکشی داشته باشد.`,
+      }
     );
 
-    return NextResponse.json({
-      plant: {
+    const localized = localizeCatalogPlant(
+      {
         ...plant,
         wateringGuide,
         lightGuide,
         soilGuide,
-        faq: extra.faq,
-        temperature: extra.temperature,
-        humidity: extra.humidity,
-        growthRate: extra.growthRate,
-        pruning: extra.pruning,
-        expertInsight: extra.expertInsight,
+      },
+      locale
+    );
+
+    return NextResponse.json({
+      plant: {
+        ...localized,
+        faq: extra.faq.map((item) => ({
+          question: localizePlantText(item.question, locale) || item.question,
+          answer: localizePlantText(item.answer, locale) || item.answer,
+        })),
+        temperature: localizePlantText(extra.temperature, locale),
+        humidity: localizePlantText(extra.humidity, locale),
+        growthRate: localizePlantText(extra.growthRate, locale),
+        pruning: localizePlantText(extra.pruning, locale),
+        expertInsight: localizePlantText(extra.expertInsight, locale),
       },
     });
   } catch (error) {
