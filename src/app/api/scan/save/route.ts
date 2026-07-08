@@ -16,13 +16,17 @@ async function resolveImageUrl(
   imageUrl: string,
   userId: string
 ): Promise<string> {
-  if (imageUrl.startsWith("http")) return imageUrl;
-  if (!isCloudinaryConfigured()) return imageUrl;
-  const dataUrl = imageUrl.startsWith("data:")
-    ? imageUrl
-    : `data:image/jpeg;base64,${imageUrl}`;
-  const uploaded = await uploadBase64Image(dataUrl, `plantcare/${userId}/scans`);
-  return uploaded.url;
+  if (imageUrl.startsWith("http") || imageUrl.startsWith("inline:")) {
+    return imageUrl;
+  }
+  if (isCloudinaryConfigured()) {
+    const dataUrl = imageUrl.startsWith("data:")
+      ? imageUrl
+      : `data:image/jpeg;base64,${imageUrl}`;
+    const uploaded = await uploadBase64Image(dataUrl, `plantcare/${userId}/scans`);
+    return uploaded.url;
+  }
+  return `inline:${userId}:${Date.now()}`;
 }
 
 export async function POST(request: NextRequest) {

@@ -41,7 +41,7 @@ test.describe("Authentication", () => {
   test("register page loads", async ({ page }) => {
     await page.goto("/auth/register");
     await expect(
-      page.getByRole("heading", { name: /Join PlantCare|به گیاه‌یار/i })
+      page.getByRole("heading", { name: /به گیاه‌یار/i })
     ).toBeVisible();
     await expect(page.getByLabel(/Username|نام کاربری/i)).toBeVisible();
   });

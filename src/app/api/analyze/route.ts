@@ -14,6 +14,8 @@ import { analyzeLocaleSchema, analyzeResponseSchema } from "@/types/analyze-api"
 import { imageScanTypeSchema } from "@/types/analysis";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+export const runtime = "nodejs";
 
 const ANALYZE_LIMIT = 10;
 const ANALYZE_WINDOW_MS = 60 * 60 * 1000;
@@ -127,7 +129,7 @@ export async function POST(request: NextRequest) {
       imageType = parsedType.data;
     }
 
-    const imageUrl = await uploadScanImage(buffer, mimeType, base64, user.id);
+    const storedImageUrl = await uploadScanImage(buffer, mimeType, base64, user.id);
 
     const analysis = await analyzePlantImage(base64, mimeType, {
       imageType,
@@ -136,15 +138,20 @@ export async function POST(request: NextRequest) {
 
     const scan = await saveScanResult({
       userId: user.id,
-      imageUrl,
+      imageUrl: storedImageUrl,
       imageType,
       analysis,
     });
 
+    const responseImageUrl =
+      storedImageUrl.startsWith("http://") || storedImageUrl.startsWith("https://")
+        ? storedImageUrl
+        : "";
+
     const response = analyzeResponseSchema.parse({
       success: true,
       data: analysis,
-      imageUrl,
+      imageUrl: responseImageUrl,
       scanId: scan.id,
       locale,
       demo: isDemoAiMode(),

@@ -24,6 +24,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocaleFormat } from "@/hooks/useLocaleFormat";
 import { MAX_IMAGE_BYTES } from "@/lib/image-validation";
+import { compressImageDataUrl, isPersistedImageUrl } from "@/lib/image-compress";
+import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 import { cn } from "@/lib/utils";
 import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { formatDate } from "@/utils/dateHelper";
@@ -58,10 +60,6 @@ interface ScanListItem {
   createdAt: string;
 }
 
-function parseMimeFromPreview(preview: string): string {
-  const match = preview.match(/^data:(image\/[a-z+]+);/i);
-  return match?.[1] || "image/jpeg";
-}
 
 export default function ScanPage() {
   const { t, locale } = useLanguage();
@@ -70,9 +68,11 @@ export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const [step, setStep] = useState<ScanStep>("capture");
   const [cameraActive, setCameraActive] = useState(false);
+  const [cameraStarting, setCameraStarting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageType, setImageType] = useState<ImageScanType>("full_plant");
   const [analysisStep, setAnalysisStep] = useState(0);
@@ -110,37 +110,94 @@ export default function ScanPage() {
   }, [fetchHistory]);
 
   const stopCamera = useCallback(() => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
     setCameraActive(false);
+    setCameraStarting(false);
   }, []);
 
   const startCamera = useCallback(async () => {
+    if (cameraStarting || cameraActive) return;
+    setCameraStarting(true);
+    setError(null);
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setCameraActive(true);
-        setImagePreview(null);
-        setError(null);
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Camera not supported");
       }
+
+      const constraintSets: MediaStreamConstraints[] = [
+        {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        },
+        {
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        },
+        { video: true, audio: false },
+      ];
+
+      let stream: MediaStream | null = null;
+      for (const constraints of constraintSets) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          break;
+        } catch {
+          // Try the next, less strict camera constraint set.
+        }
+      }
+
+      if (!stream) {
+        throw new Error("Camera permission denied");
+      }
+
+      streamRef.current = stream;
+      setImagePreview(null);
+      setCameraActive(true);
     } catch {
+      stopCamera();
       setError(t.scan.errors.cameraDenied);
+    } finally {
+      setCameraStarting(false);
     }
-  }, [t.scan.errors.cameraDenied]);
+  }, [cameraActive, cameraStarting, stopCamera, t.scan.errors.cameraDenied]);
+
+  useEffect(() => {
+    if (!cameraActive) return;
+
+    const stream = streamRef.current;
+    const video = videoRef.current;
+    if (!stream || !video) return;
+
+    video.srcObject = stream;
+    void video.play().catch(() => {
+      setError(t.scan.errors.cameraDenied);
+      stopCamera();
+    });
+  }, [cameraActive, stopCamera, t.scan.errors.cameraDenied]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
   const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
+      return;
+    }
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d")?.drawImage(video, 0, 0);
@@ -215,15 +272,13 @@ export default function ScanPage() {
     }, 1500);
 
     try {
-      const base64 = imagePreview.includes(",")
-        ? imagePreview.split(",")[1]
-        : imagePreview;
+      const compressed = await compressImageDataUrl(imagePreview);
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          image: base64,
-          mimeType: parseMimeFromPreview(imagePreview),
+          image: compressed.base64,
+          mimeType: compressed.mimeType,
           imageType,
           locale,
         }),
@@ -233,7 +288,11 @@ export default function ScanPage() {
       if (!res.ok) throw new Error(data.error || t.scan.errors.analysisFailed);
       setResult(data.data);
       setScanId(data.scanId || null);
-      if (data.imageUrl) setImagePreview(data.imageUrl);
+      if (data.imageUrl && isPersistedImageUrl(data.imageUrl)) {
+        setImagePreview(data.imageUrl);
+      } else {
+        setImagePreview(compressed.dataUrl);
+      }
       setStep("results");
       setActiveTab("plant");
       fetchHistory();
@@ -340,7 +399,10 @@ export default function ScanPage() {
           treatment: data.scan.treatment,
         });
         setScanId(data.scan.id);
-        setImagePreview(data.scan.imageUrl);
+        const storedUrl = data.scan.imageUrl as string;
+        if (isPersistedImageUrl(storedUrl) || storedUrl.startsWith("data:")) {
+          setImagePreview(storedUrl);
+        }
         setStep("results");
         setActiveTab("plant");
         setError(null);
@@ -419,7 +481,13 @@ export default function ScanPage() {
             onDrop={handleDrop}
           >
             {cameraActive ? (
-              <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                playsInline
+                muted
+                autoPlay
+              />
             ) : imagePreview ? (
               <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
@@ -475,8 +543,16 @@ export default function ScanPage() {
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center">
             {!cameraActive && !imagePreview && (
               <>
-                <Button onClick={startCamera} className="w-full sm:w-auto">
-                  <Camera className="w-4 h-4" />
+                <Button
+                  onClick={startCamera}
+                  className="w-full sm:w-auto"
+                  disabled={cameraStarting}
+                >
+                  {cameraStarting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4" />
+                  )}
                   {t.scan.camera}
                 </Button>
                 <Button
@@ -522,7 +598,6 @@ export default function ScanPage() {
             ref={fileInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            capture="environment"
             className="hidden"
             onChange={handleFileUpload}
           />
@@ -560,10 +635,10 @@ export default function ScanPage() {
                       onClick={() => loadScanFromHistory(scan.id)}
                       className="glass-card overflow-hidden rounded-xl text-start hover:ring-2 hover:ring-primary/30 transition-all"
                     >
-                      <img
+                      <ScanThumbnail
                         src={scan.imageUrl}
-                        alt=""
                         className="aspect-square object-cover w-full"
+                        iconClassName="w-10 h-10"
                       />
                       <div className="p-2">
                         <p className="text-xs font-medium truncate">

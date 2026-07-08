@@ -26,6 +26,7 @@ import { useLocaleFormat } from "@/hooks/useLocaleFormat";
 import { formatDate, formatDateTime } from "@/utils/dateHelper";
 import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { cn } from "@/lib/utils";
+import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 
 interface DashboardData {
   profile: {
@@ -293,7 +294,10 @@ export default function DashboardPage() {
             {data.recentScans.map((scan) => (
               <div key={scan.id} className="glass-card overflow-hidden">
                 <div className="aspect-square bg-emerald-500/10">
-                  <img src={scan.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <ScanThumbnail
+                    src={scan.imageUrl}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="p-2">
                   <p className="text-xs font-medium truncate">

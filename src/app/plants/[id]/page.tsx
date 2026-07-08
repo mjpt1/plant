@@ -25,6 +25,7 @@ import { formatDateTime } from "@/utils/dateHelper";
 import { cn } from "@/lib/utils";
 import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { toast } from "sonner";
+import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 import type { CarePlanTaskView, CareReminderItem } from "@/types";
 import { Button } from "@/components/ui/button";
 
@@ -401,9 +402,8 @@ export default function PlantDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
             {plant.scanHistory.map((scan) => (
               <div key={scan.id} className="glass-card overflow-hidden rounded-xl">
-                <img
+                <ScanThumbnail
                   src={scan.imageUrl}
-                  alt=""
                   className="aspect-square object-cover w-full"
                 />
                 <div className="p-2">

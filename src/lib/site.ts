@@ -1,24 +1,24 @@
 import { resolveAppUrl } from "@/lib/app-url";
 
 export const siteConfig = {
-  name: "PlantCare",
+  name: "گیاه‌یار",
   nameFa: "گیاه‌یار",
-  title: "گیاه‌یار | PlantCare - Plant Identification & Care",
+  title: "گیاه‌یار — شناسایی و مراقبت از گیاهان",
   description:
-    "Identify plants, diagnose diseases, connect with gardeners, and manage your plant care schedule. شناسایی گیاه، تشخیص بیماری و مدیریت مراقبت.",
+    "شناسایی گیاه، تشخیص بیماری، ارتباط با باغبانان و مدیریت برنامه مراقبت از گیاهان. Identify plants, diagnose diseases, and manage your plant care schedule.",
   descriptionFa:
     "شناسایی گیاه، تشخیص بیماری، ارتباط با باغبانان و مدیریت برنامه مراقبت از گیاهان.",
   url: resolveAppUrl(),
-  locale: "en_US",
+  locale: "fa_IR",
   themeColor: "#10b981",
   keywords: [
-    "plant identification",
-    "plant care",
-    "garden",
-    "plant disease",
-    "watering reminder",
+    "گیاه‌یار",
     "شناسایی گیاه",
     "مراقبت از گیاه",
     "گیاه آپارتمانی",
+    "plant identification",
+    "plant care",
+    "garden",
+    "watering reminder",
   ],
 } as const;

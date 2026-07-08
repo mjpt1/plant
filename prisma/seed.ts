@@ -207,7 +207,7 @@ async function ensureSocialGraph(
         data: {
           userId: adminId,
           content:
-            "Welcome to PlantCare! Share your plants, ask questions, and never miss a watering day.",
+            "به گیاه‌یار خوش آمدید! گیاهان خود را به اشتراک بگذارید، سوال بپرسید و هیچ روز آبیاری را از دست ندهید.",
         },
       }),
       prisma.post.create({
@@ -400,7 +400,7 @@ async function main() {
     role: Role.ADMIN,
     country: "Iran",
     city: "Tehran",
-    bio: "PlantCare platform administrator",
+    bio: "مدیر پلتفرم گیاه‌یار",
   });
 
   const expert = await ensureAccount({

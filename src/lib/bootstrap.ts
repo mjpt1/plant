@@ -21,7 +21,7 @@ const DEMO_ACCOUNTS = [
     role: Role.ADMIN,
     country: "Iran",
     city: "Tehran",
-    bio: "PlantCare platform administrator",
+    bio: "مدیر پلتفرم گیاه‌یار",
   },
   {
     email: "expert@plantcare.ir",

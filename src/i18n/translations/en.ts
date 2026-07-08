@@ -1,6 +1,6 @@
 export const en = {
   app: {
-    name: "PlantCare",
+    name: "گیاه‌یار",
     tagline: "Identify, diagnose & nurture your plants",
   },
   nav: {
@@ -28,7 +28,7 @@ export const en = {
     switchTo: "Switch language",
   },
   home: {
-    heroTitle: "Your Personal Plant Doctor",
+    heroTitle: "گیاه‌یار",
     heroSubtitle:
       "Identify plants, diagnose diseases, connect with gardeners, and never miss a watering day.",
     scanNow: "Scan a Plant",
@@ -213,7 +213,7 @@ export const en = {
   },
   auth: {
     loginTitle: "Welcome Back",
-    registerTitle: "Join PlantCare",
+    registerTitle: "به گیاه‌یار بپیوندید",
     email: "Email",
     password: "Password",
     name: "Full Name",
@@ -470,7 +470,7 @@ export const en = {
     next: "Next",
     previous: "Previous",
     installApp: "Install App",
-    installAppDesc: "Add PlantCare to your home screen for quick access",
+    installAppDesc: "گیاه‌یار را به صفحه اصلی اضافه کنید",
   },
 } as const;
 

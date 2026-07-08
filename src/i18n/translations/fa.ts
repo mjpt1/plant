@@ -30,7 +30,7 @@ export const fa: TranslationKeys = {
     switchTo: "تغییر زبان",
   },
   home: {
-    heroTitle: "دکتر شخصی گیاهان شما",
+    heroTitle: "گیاه‌یار",
     heroSubtitle:
       "گیاهان را شناسایی کنید، بیماری‌ها را تشخیص دهید، با باغبانان ارتباط برقرار کنید و هیچ روز آبیاری را از دست ندهید.",
     scanNow: "اسکن گیاه",

@@ -20,7 +20,23 @@ export async function uploadScanImage(
     return uploaded.url;
   }
 
-  return `data:${mimeType};base64,${base64}`;
+  return `inline:${userId}:${Date.now()}`;
+}
+
+export function resolveScanImageUrl(
+  storedUrl: string,
+  fallbackDataUrl?: string
+): string | null {
+  if (isPersistedImageUrl(storedUrl)) return storedUrl;
+  if (storedUrl.startsWith("data:")) return storedUrl;
+  if (storedUrl.startsWith("inline:")) {
+    return fallbackDataUrl || null;
+  }
+  return storedUrl;
+}
+
+function isPersistedImageUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
 }
 
 export async function saveScanResult(input: {
