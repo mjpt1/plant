@@ -1,6 +1,5 @@
 import type { Locale } from "@/i18n";
 import {
-  CATEGORY_FA,
   PERSIAN_PLANT_NAMES,
   getCategoryFa,
   getPersianName,
@@ -168,7 +167,6 @@ export function localizePlantName(
   const nameFa = entry.nameFa?.trim() || "";
   const scientific = entry.scientificName?.trim() || "";
   const category = entry.category || "";
-  const categoryFa = entry.categoryFa || getCategoryFa(category);
 
   if (locale === "en") {
     if (nameEn && !isScientificBinomial(nameEn)) return nameEn;

@@ -27,7 +27,6 @@ import { MAX_IMAGE_BYTES } from "@/lib/image-validation";
 import { compressImageDataUrl, isPersistedImageUrl } from "@/lib/image-compress";
 import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 import { cn } from "@/lib/utils";
-import { localizePlantName } from "@/lib/plant-locale";
 import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { formatDate } from "@/utils/dateHelper";
 import { toast } from "sonner";
