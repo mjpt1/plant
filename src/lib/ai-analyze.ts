@@ -1,4 +1,5 @@
 import { plantAnalysisSchema, type PlantAnalysis } from "@/types/analysis";
+import { z } from "zod";
 import { formatBotanicalFamily } from "@/lib/botanical-family";
 import {
   findCatalogByScientificName,
@@ -14,6 +15,10 @@ import {
   localizePlantText,
   localizeEnumValue,
 } from "@/lib/plant-locale";
+import {
+  getHeuristicHealthAssessment,
+  needsVisualHealthAssessment,
+} from "@/lib/plant-health-heuristics";
 import type { Locale } from "@/i18n";
 
 function getPrimaryAnalysisKey(): string | undefined {
@@ -313,10 +318,10 @@ function buildAnalysisFromCatalog(
       humidity: fa ? "بسته به گونه متفاوت است" : "Varies by species",
     },
     treatment: {
-      immediateActions: watering !== careFallback ? [watering] : [
+      immediateActions: [
         fa
-          ? "گیاه را با نور و آبیاری مناسب نگه دارید."
-          : "Maintain appropriate light and watering.",
+          ? "برگ‌های آسیب‌دیده را جدا کنید و بهداشت ابزار را رعایت کنید."
+          : "Remove damaged leaves and sanitize pruning tools.",
       ],
       stepByStepPlan: [
         fa
@@ -325,6 +330,9 @@ function buildAnalysisFromCatalog(
         fa
           ? "برنامه مراقبت را به تقویم اضافه کنید."
           : "Add a care schedule to your calendar.",
+        fa
+          ? "برای تشخیص بیماری، عکس نزدیک از ناحیهٔ آسیب‌دیده بگیرید."
+          : "For disease checks, take a close-up of affected tissue.",
       ],
       prevention: catalog?.toxicity
         ? [localizePlantText(catalog.toxicity, lang) || catalog.toxicity]
@@ -371,6 +379,288 @@ const ANALYSIS_PROMPT = `You are an expert botanist and plant pathologist. Analy
 }
 
 Your analysis MUST cover plant identification (including botanical family, description, and uses), disease signs, soil condition, pest signs, treatment plan, and confidence scores (0-100). Be specific and practical for home gardeners.`;
+
+const HEALTH_ANALYSIS_PROMPT = `You are an expert plant pathologist. Analyze THIS image for visible disease, pest damage, nutrient deficiency, and environmental stress.
+
+Return ONLY valid JSON (no markdown):
+{
+  "health": {
+    "status": "healthy | warning | critical | unknown",
+    "possibleProblems": [],
+    "diseaseDiagnosis": [],
+    "pestDiagnosis": [],
+    "soilAnalysis": "",
+    "confidence": 0
+  },
+  "treatment": {
+    "immediateActions": [],
+    "stepByStepPlan": [],
+    "prevention": [],
+    "warnings": []
+  }
+}
+
+Critical rules:
+- diseaseDiagnosis: ONLY specific pathology you can see (fungal spots, rot, mosaic virus, bacterial ooze, etc.)
+- NEVER put generic watering advice in diseaseDiagnosis (no "underwatering", "overwatering", "کم آبی", "آبیاری کم" unless crisp dry soil + wilt are clearly visible)
+- possibleProblems may include watering/light/nutrient suspects as hypotheses, not confirmed diseases
+- If the plant looks healthy, status="healthy" and leave diagnosis arrays empty
+- Be conservative: when unsure, use status="unknown" rather than guessing`;
+
+function buildHealthPrompt(
+  imageType?: string,
+  locale?: string,
+  plantContext?: {
+    commonName: string;
+    scientificName: string;
+    family: string;
+    category: string;
+  }
+) {
+  const typeHint = imageType
+    ? `Photo focus: ${imageType.replace("_", " ")}.`
+    : "";
+  const langHint =
+    locale === "fa"
+      ? "Write all text values in Persian (Farsi)."
+      : "Write all text values in English.";
+  const plantHint = plantContext?.scientificName
+    ? `Known plant: ${plantContext.commonName} (${plantContext.scientificName}), family ${plantContext.family}, category ${plantContext.category}.`
+    : "";
+  return `${HEALTH_ANALYSIS_PROMPT}\n${typeHint}\n${plantHint}\n${langHint}`;
+}
+
+const healthOnlySchema = z.object({
+  health: plantAnalysisSchema.shape.health,
+  treatment: plantAnalysisSchema.shape.treatment,
+});
+
+function extractHealthJson(content: string): z.infer<typeof healthOnlySchema> {
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("Invalid JSON response from health analysis");
+  }
+  const parsed = JSON.parse(jsonMatch[0]);
+  const result = healthOnlySchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error("Health analysis response did not match expected schema");
+  }
+  return result.data;
+}
+
+function mergeHealthAnalysis(
+  base: PlantAnalysis,
+  healthResult: z.infer<typeof healthOnlySchema>
+): PlantAnalysis {
+  return {
+    ...base,
+    health: healthResult.health,
+    treatment: {
+      immediateActions:
+        healthResult.treatment.immediateActions.length > 0
+          ? healthResult.treatment.immediateActions
+          : base.treatment.immediateActions,
+      stepByStepPlan:
+        healthResult.treatment.stepByStepPlan.length > 0
+          ? healthResult.treatment.stepByStepPlan
+          : base.treatment.stepByStepPlan,
+      prevention:
+        healthResult.treatment.prevention.length > 0
+          ? healthResult.treatment.prevention
+          : base.treatment.prevention,
+      warnings: healthResult.treatment.warnings,
+    },
+  };
+}
+
+function applyHeuristicHealth(
+  base: PlantAnalysis,
+  imageType: string | undefined,
+  locale?: string
+): PlantAnalysis {
+  const heuristic = getHeuristicHealthAssessment(
+    imageType as import("@/types/analysis").ImageScanType,
+    base.plant.category,
+    (locale || "fa") as Locale
+  );
+  if (!heuristic) return base;
+
+  return {
+    ...base,
+    health: {
+      status: heuristic.status,
+      possibleProblems: heuristic.possibleProblems,
+      diseaseDiagnosis: heuristic.diseaseDiagnosis,
+      pestDiagnosis: heuristic.pestDiagnosis,
+      soilAnalysis: heuristic.soilAnalysis,
+      confidence: heuristic.confidence,
+    },
+  };
+}
+
+async function analyzeHealthWithOpenAI(
+  base64Image: string,
+  mimeType: string,
+  imageType?: string,
+  locale?: string,
+  plantContext?: {
+    commonName: string;
+    scientificName: string;
+    family: string;
+    category: string;
+  }
+): Promise<z.infer<typeof healthOnlySchema>> {
+  const apiKey = getPrimaryAnalysisKey();
+  if (!apiKey) throw new Error("Primary analysis key is not configured");
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: buildHealthPrompt(imageType, locale, plantContext),
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${base64Image}`,
+                detail: "high",
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 2048,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Health analysis error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error("No health analysis response");
+  return extractHealthJson(content);
+}
+
+async function analyzeHealthWithGemini(
+  base64Image: string,
+  mimeType: string,
+  imageType?: string,
+  locale?: string,
+  plantContext?: {
+    commonName: string;
+    scientificName: string;
+    family: string;
+    category: string;
+  }
+): Promise<z.infer<typeof healthOnlySchema>> {
+  const apiKey = getFallbackAnalysisKey();
+  if (!apiKey) throw new Error("Fallback analysis key is not configured");
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: buildHealthPrompt(imageType, locale, plantContext) },
+              { inline_data: { mime_type: mimeType, data: base64Image } },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Health analysis error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!content) throw new Error("No health analysis response");
+  return extractHealthJson(content);
+}
+
+async function enrichWithHealthAnalysis(
+  base: PlantAnalysis,
+  base64Image: string,
+  mimeType: string,
+  imageType?: string,
+  locale?: string
+): Promise<PlantAnalysis> {
+  if (!hasLlmAnalysisConfigured()) {
+    if (needsVisualHealthAssessment(imageType)) {
+      return applyHeuristicHealth(base, imageType, locale);
+    }
+    return base;
+  }
+
+  const plantContext = {
+    commonName: base.plant.commonName,
+    scientificName: base.plant.scientificName,
+    family: base.plant.family,
+    category: base.plant.category || "",
+  };
+
+  try {
+    let healthResult: z.infer<typeof healthOnlySchema>;
+    if (getPrimaryAnalysisKey()) {
+      try {
+        healthResult = await analyzeHealthWithOpenAI(
+          base64Image,
+          mimeType,
+          imageType,
+          locale,
+          plantContext
+        );
+      } catch {
+        healthResult = await analyzeHealthWithGemini(
+          base64Image,
+          mimeType,
+          imageType,
+          locale,
+          plantContext
+        );
+      }
+    } else {
+      healthResult = await analyzeHealthWithGemini(
+        base64Image,
+        mimeType,
+        imageType,
+        locale,
+        plantContext
+      );
+    }
+    return mergeHealthAnalysis(base, healthResult);
+  } catch {
+    if (needsVisualHealthAssessment(imageType)) {
+      return applyHeuristicHealth(base, imageType, locale);
+    }
+    return base;
+  }
+}
 
 function buildPrompt(imageType?: string, locale?: string) {
   const typeHint = imageType
@@ -552,7 +842,19 @@ async function analyzeWithPlantNet(
     identification.scientificName,
     locale
   );
-  return buildAnalysisFromCatalog(catalog, identification, locale, imageType);
+  const base = buildAnalysisFromCatalog(
+    catalog,
+    identification,
+    locale,
+    imageType
+  );
+  return enrichWithHealthAnalysis(
+    base,
+    base64Image,
+    mimeType,
+    imageType,
+    locale
+  );
 }
 
 async function analyzeWithLlm(
@@ -602,9 +904,10 @@ export async function analyzePlantImage(
 
   const preferPlantNet =
     process.env.ANALYSIS_PROVIDER === "plantnet" ||
+    process.env.ANALYSIS_PROVIDER === "hybrid" ||
     (!hasLlmAnalysisConfigured() && !!getPlantNetApiKey());
 
-  if (preferPlantNet) {
+  if (preferPlantNet && getPlantNetApiKey()) {
     return analyzeWithPlantNet(
       base64Image,
       mimeType,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, type DragEvent } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, type DragEvent } from "react";
 import Link from "next/link";
 import {
   Camera,
@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { localizeAnalysisResult } from "@/lib/plant-locale";
 
 type ScanStep = "capture" | "analyzing" | "results";
 type ResultTab = "plant" | "health" | "care" | "treatment";
@@ -119,6 +120,11 @@ export default function ScanPage() {
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
+
+  const displayResult = useMemo(
+    () => (result ? localizeAnalysisResult(result, locale) : null),
+    [result, locale]
+  );
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -719,17 +725,17 @@ export default function ScanPage() {
         </div>
       )}
 
-      {step === "results" && result && (
+      {step === "results" && result && displayResult && (
         <div className="space-y-5 sm:space-y-6 animate-fade-in">
           {imagePreview && (
             <div className="relative aspect-video rounded-2xl overflow-hidden glass-card">
               <img src={imagePreview} alt="Scanned" className="w-full h-full object-cover" />
               <div className="absolute top-3 end-3 sm:top-4 sm:end-4 flex flex-wrap items-center justify-end gap-2 max-w-[70%]">
-                <Badge variant={healthVariant(result.health.status)}>
-                  {getHealthStatusLabel(result.health.status, t)}
+                <Badge variant={healthVariant(displayResult.health.status)}>
+                  {getHealthStatusLabel(displayResult.health.status, t)}
                 </Badge>
                 <Badge variant="outline">
-                  {t.scan.results.confidence}: {formatPercent(result.plant.confidence)}
+                  {t.scan.results.confidence}: {formatPercent(displayResult.plant.confidence)}
                 </Badge>
                 {scanId && (
                   <Badge variant="secondary" className="gap-1">
@@ -763,47 +769,47 @@ export default function ScanPage() {
             <Card className="glass-card border-0">
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">
-                  {getScanPlantName(result.plant, locale)}
+                  {getScanPlantName(displayResult.plant, locale)}
                 </CardTitle>
-                {result.plant.scientificName && (
+                {displayResult.plant.scientificName && (
                   <p className="text-muted-foreground italic text-sm sm:text-base">
                     <span className="not-italic text-xs text-muted-foreground/80 me-1">
                       {t.scan.results.scientificName}:
                     </span>
-                    {result.plant.scientificName}
+                    {displayResult.plant.scientificName}
                   </p>
                 )}
                 <div className="flex flex-wrap gap-2 pt-1">
-                  {result.plant.family && (
+                  {displayResult.plant.family && (
                     <Badge variant="secondary" className="font-normal">
-                      {t.scan.results.family}: {result.plant.family}
+                      {t.scan.results.family}: {displayResult.plant.family}
                     </Badge>
                   )}
-                  {result.plant.category && (
+                  {displayResult.plant.category && (
                     <Badge variant="outline" className="font-normal">
-                      {t.scan.results.category}: {result.plant.category}
+                      {t.scan.results.category}: {displayResult.plant.category}
                     </Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground pt-1">
-                  {t.scan.results.confidence}: {formatPercent(result.plant.confidence)}
+                  {t.scan.results.confidence}: {formatPercent(displayResult.plant.confidence)}
                 </p>
               </CardHeader>
-              {(result.plant.description || result.plant.uses) && (
+              {(displayResult.plant.description || displayResult.plant.uses) && (
                 <CardContent className="space-y-4 pt-0">
-                  {result.plant.description && (
+                  {displayResult.plant.description && (
                     <div>
                       <h4 className="font-medium mb-1 text-sm">{t.scan.results.description}</h4>
                       <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                        {result.plant.description}
+                        {displayResult.plant.description}
                       </p>
                     </div>
                   )}
-                  {result.plant.uses && (
+                  {displayResult.plant.uses && (
                     <div>
                       <h4 className="font-medium mb-1 text-sm">{t.scan.results.uses}</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {result.plant.uses}
+                        {displayResult.plant.uses}
                       </p>
                     </div>
                   )}
@@ -816,58 +822,64 @@ export default function ScanPage() {
             <Card className="glass-card border-0">
               <CardContent className="pt-6 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={healthVariant(result.health.status)}>
-                    {getHealthStatusLabel(result.health.status, t)}
+                  <Badge variant={healthVariant(displayResult.health.status)}>
+                    {getHealthStatusLabel(displayResult.health.status, t)}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    {formatPercent(result.health.confidence)} {t.scan.results.confidence}
+                    {formatPercent(displayResult.health.confidence)} {t.scan.results.confidence}
                   </span>
                 </div>
-                {result.health.soilAnalysis && (
+                {displayResult.health.soilAnalysis && (
                   <div>
                     <h4 className="font-medium mb-1 text-sm">{t.scan.results.soil}</h4>
-                    <p className="text-sm text-muted-foreground">{result.health.soilAnalysis}</p>
+                    <p className="text-sm text-muted-foreground">{displayResult.health.soilAnalysis}</p>
                   </div>
                 )}
-                {result.health.diseaseDiagnosis.length > 0 && (
+                {displayResult.health.diseaseDiagnosis.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-500" />
                       {t.scan.results.disease}
                     </h4>
                     <ul className="list-disc ps-5 text-sm space-y-1">
-                      {result.health.diseaseDiagnosis.map((d, i) => (
+                      {displayResult.health.diseaseDiagnosis.map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {result.health.pestDiagnosis.length > 0 && (
+                {displayResult.health.pestDiagnosis.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">{t.scan.results.pests}</h4>
                     <ul className="list-disc ps-5 text-sm space-y-1">
-                      {result.health.pestDiagnosis.map((p, i) => (
+                      {displayResult.health.pestDiagnosis.map((p, i) => (
                         <li key={i}>{p}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {result.health.possibleProblems.length > 0 && (
+                {displayResult.health.possibleProblems.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">{t.scan.results.problems}</h4>
                     <ul className="list-disc ps-5 text-sm space-y-1">
-                      {result.health.possibleProblems.map((p, i) => (
+                      {displayResult.health.possibleProblems.map((p, i) => (
                         <li key={i}>{p}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {result.health.diseaseDiagnosis.length === 0 &&
-                  result.health.pestDiagnosis.length === 0 && (
+                {displayResult.health.diseaseDiagnosis.length === 0 &&
+                  displayResult.health.pestDiagnosis.length === 0 &&
+                  displayResult.health.status === "healthy" && (
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="w-5 h-5" />
                       {t.scan.results.healthy}
                     </div>
+                  )}
+                {displayResult.health.diseaseDiagnosis.length === 0 &&
+                  displayResult.health.pestDiagnosis.length === 0 &&
+                  displayResult.health.status !== "healthy" && (
+                    <p className="text-sm text-muted-foreground">{t.scan.results.healthUncertain}</p>
                   )}
               </CardContent>
             </Card>
@@ -876,12 +888,12 @@ export default function ScanPage() {
           {activeTab === "care" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { icon: Droplets, label: t.scan.results.watering, value: result.care.watering },
-                { icon: Sun, label: t.scan.results.light, value: result.care.light },
-                { icon: FlaskConical, label: t.scan.results.fertilizer, value: result.care.fertilizer },
-                { icon: Shovel, label: t.scan.results.soilType, value: result.care.soil },
-                { icon: Thermometer, label: t.catalog.temperature, value: result.care.temperature },
-                { icon: Droplets, label: t.catalog.humidity, value: result.care.humidity },
+                { icon: Droplets, label: t.scan.results.watering, value: displayResult.care.watering },
+                { icon: Sun, label: t.scan.results.light, value: displayResult.care.light },
+                { icon: FlaskConical, label: t.scan.results.fertilizer, value: displayResult.care.fertilizer },
+                { icon: Shovel, label: t.scan.results.soilType, value: displayResult.care.soil },
+                { icon: Thermometer, label: t.catalog.temperature, value: displayResult.care.temperature },
+                { icon: Droplets, label: t.catalog.humidity, value: displayResult.care.humidity },
               ].map((item) => (
                 <Card key={item.label} className="glass-card border-0">
                   <CardContent className="pt-4">
@@ -898,13 +910,13 @@ export default function ScanPage() {
 
           {activeTab === "treatment" && (
             <div className="space-y-4">
-              {result.treatment.immediateActions.length > 0 && (
+              {displayResult.treatment.immediateActions.length > 0 && (
                 <Card className="glass-card border-0 border-amber-500/20">
                   <CardHeader>
                     <CardTitle className="text-base">{t.scan.results.immediate}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.treatment.immediateActions.map((action, i) => (
+                    {displayResult.treatment.immediateActions.map((action, i) => (
                       <p key={i} className="text-sm flex gap-2">
                         <span className="text-amber-500 font-bold">{i + 1}.</span>
                         {action}
@@ -913,8 +925,8 @@ export default function ScanPage() {
                   </CardContent>
                 </Card>
               )}
-              {result.treatment.stepByStepPlan.length > 0 ? (
-                result.treatment.stepByStepPlan.map((planStep, i) => (
+              {displayResult.treatment.stepByStepPlan.length > 0 ? (
+                displayResult.treatment.stepByStepPlan.map((planStep, i) => (
                   <Card key={i} className="glass-card border-0">
                     <CardContent className="pt-4 flex gap-4">
                       <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
@@ -929,7 +941,7 @@ export default function ScanPage() {
                   {t.scan.results.healthy}
                 </p>
               )}
-              {result.treatment.warnings.length > 0 && (
+              {displayResult.treatment.warnings.length > 0 && (
                 <Card className="glass-card border-0 border-destructive/20">
                   <CardHeader>
                     <CardTitle className="text-base text-destructive">
@@ -937,19 +949,19 @@ export default function ScanPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1">
-                    {result.treatment.warnings.map((w, i) => (
+                    {displayResult.treatment.warnings.map((w, i) => (
                       <p key={i} className="text-sm">{w}</p>
                     ))}
                   </CardContent>
                 </Card>
               )}
-              {result.treatment.prevention.length > 0 && (
+              {displayResult.treatment.prevention.length > 0 && (
                 <Card className="glass-card border-0">
                   <CardHeader>
                     <CardTitle className="text-base">{t.scan.results.prevention}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.treatment.prevention.map((tip, i) => (
+                    {displayResult.treatment.prevention.map((tip, i) => (
                       <p key={i} className="text-sm">{tip}</p>
                     ))}
                   </CardContent>

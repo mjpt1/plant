@@ -14,7 +14,7 @@ export function getDirection(locale: Locale): "ltr" | "rtl" {
 }
 
 export function readClientLocale(): Locale {
-  if (typeof window === "undefined") return "en";
+  if (typeof window === "undefined") return "fa";
 
   const fromHtml = parseLocale(document.documentElement.lang);
   if (fromHtml) return fromHtml;
@@ -34,7 +34,7 @@ export function readClientLocale(): Locale {
     // localStorage may be blocked
   }
 
-  return "en";
+  return "fa";
 }
 
 export function persistClientLocale(locale: Locale): void {

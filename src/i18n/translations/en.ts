@@ -95,6 +95,8 @@ export const en = {
       description: "About this plant",
       uses: "Uses",
       scientificName: "Scientific name",
+      healthUncertain:
+        "This photo cannot confirm disease with certainty — choose Leaf or Pest signs and take a closer shot.",
     },
     history: "Recent Scans",
     noHistory: "No scans yet — analyze your first plant!",

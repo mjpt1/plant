@@ -4,6 +4,8 @@ import {
   getCategoryFa,
   getPersianName,
 } from "@/data/plantNames";
+import { formatBotanicalFamily } from "@/lib/botanical-family";
+import type { PlantAnalysis } from "@/types/analysis";
 
 export type PlantNameFields = {
   nameEn: string;
@@ -110,12 +112,6 @@ const EN_FA_PHRASES: [string, string][] = [
   ["culinary", "خوراکی"],
   ["ornamental", "زینتی"],
   ["aromatic", "معطر"],
-  ["low", "کم"],
-  ["medium", "متوسط"],
-  ["high", "زیاد"],
-  ["easy", "آسان"],
-  ["moderate", "متوسط"],
-  ["difficult", "سخت"],
 ];
 
 const FA_EN_PHRASES: [string, string][] = EN_FA_PHRASES.map(([en, fa]) => [fa, en]);
@@ -312,7 +308,7 @@ export function getLocaleFromRequest(request: {
   if (fromQuery === "fa" || fromQuery === "en") return fromQuery;
   const cookie = request.cookies.get("plantcare-locale")?.value;
   if (cookie === "fa" || cookie === "en") return cookie;
-  return "en";
+  return "fa";
 }
 
 export function resolveBilingualNames(
@@ -335,4 +331,85 @@ export function resolveBilingualNames(
   );
 
   return { nameEn: en, nameFa: fa };
+}
+
+function localizeStringArray(
+  items: string[],
+  locale: Locale
+): string[] {
+  return items.map((item) => localizePlantText(item, locale) || item);
+}
+
+/** Re-localize a stored or AI analysis snapshot for the active UI locale. */
+export function localizeAnalysisResult(
+  analysis: PlantAnalysis,
+  locale: Locale
+): PlantAnalysis {
+  if (locale === "en") return analysis;
+
+  const plantFields = {
+    nameEn: analysis.plant.commonNameEn || analysis.plant.commonName,
+    nameFa: analysis.plant.commonNameFa || "",
+    scientificName: analysis.plant.scientificName,
+    category: analysis.plant.category,
+  };
+
+  return {
+    plant: {
+      ...analysis.plant,
+      commonName: localizePlantName(plantFields, locale),
+      description:
+        localizePlantText(analysis.plant.description, locale) ||
+        analysis.plant.description,
+      category: localizeCategory(
+        analysis.plant.category || "",
+        undefined,
+        locale
+      ),
+      uses: localizePlantText(analysis.plant.uses, locale) || analysis.plant.uses,
+      family:
+        formatBotanicalFamily(analysis.plant.family, locale) ||
+        analysis.plant.family,
+    },
+    health: {
+      ...analysis.health,
+      possibleProblems: localizeStringArray(
+        analysis.health.possibleProblems,
+        locale
+      ),
+      diseaseDiagnosis: localizeStringArray(
+        analysis.health.diseaseDiagnosis,
+        locale
+      ),
+      pestDiagnosis: localizeStringArray(analysis.health.pestDiagnosis, locale),
+      soilAnalysis:
+        localizePlantText(analysis.health.soilAnalysis, locale) ||
+        analysis.health.soilAnalysis,
+    },
+    care: {
+      watering: localizePlantText(analysis.care.watering, locale) || analysis.care.watering,
+      light: localizePlantText(analysis.care.light, locale) || analysis.care.light,
+      soil: localizePlantText(analysis.care.soil, locale) || analysis.care.soil,
+      fertilizer:
+        localizePlantText(analysis.care.fertilizer, locale) ||
+        analysis.care.fertilizer,
+      temperature:
+        localizePlantText(analysis.care.temperature, locale) ||
+        analysis.care.temperature,
+      humidity:
+        localizePlantText(analysis.care.humidity, locale) || analysis.care.humidity,
+    },
+    treatment: {
+      immediateActions: localizeStringArray(
+        analysis.treatment.immediateActions,
+        locale
+      ),
+      stepByStepPlan: localizeStringArray(
+        analysis.treatment.stepByStepPlan,
+        locale
+      ),
+      prevention: localizeStringArray(analysis.treatment.prevention, locale),
+      warnings: localizeStringArray(analysis.treatment.warnings, locale),
+    },
+  };
 }

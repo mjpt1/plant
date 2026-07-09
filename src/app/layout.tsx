@@ -65,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieLocale = parseLocale(cookies().get(LOCALE_COOKIE_NAME)?.value);
-  const locale = cookieLocale ?? "en";
+  const locale = cookieLocale ?? "fa";
   const dir = getDirection(locale);
 
   return (

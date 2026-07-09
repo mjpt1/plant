@@ -15,7 +15,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocaleFormat } from "@/hooks/useLocaleFormat";
-import { localizePlantName, localizeCategory } from "@/lib/plant-locale";
+import { localizePlantName, localizeCategory, localizeEnumValue } from "@/lib/plant-locale";
 import { cn } from "@/lib/utils";
 
 interface CatalogPlant {
@@ -202,11 +202,26 @@ export default function CatalogPage() {
                     {plant.waterRequirement && (
                       <span className="flex items-center gap-1">
                         <Droplets className="w-3 h-3" />
-                        {plant.waterRequirement}
+                        {localizeEnumValue(plant.waterRequirement, locale, {
+                          low: "کم",
+                          medium: "متوسط",
+                          high: "زیاد",
+                          moist: "مرطوب",
+                          dry: "خشک",
+                        }) || plant.waterRequirement}
                       </span>
                     )}
                     {plant.difficulty && (
-                      <span>{plant.difficulty}</span>
+                      <span>
+                        {localizeEnumValue(plant.difficulty, locale, {
+                          easy: "آسان",
+                          moderate: "متوسط",
+                          medium: "متوسط",
+                          difficult: "سخت",
+                          hard: "سخت",
+                          beginner: "مبتدی",
+                        }) || plant.difficulty}
+                      </span>
                     )}
                   </div>
                   <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1 group-hover:gap-2 transition-all">

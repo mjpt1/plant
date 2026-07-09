@@ -30,7 +30,7 @@ function resolveLocale(
   const fromCookie = parseLocale(cookieLocale);
   if (fromCookie) return fromCookie;
 
-  return "en";
+  return "fa";
 }
 
 export async function POST(request: NextRequest) {
