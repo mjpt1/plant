@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { CareNotificationWatcher } from "@/components/CareNotificationWatcher";
 import type { ReactNode } from "react";
 import type { Locale } from "@/i18n";
 
@@ -27,6 +28,7 @@ export function Providers({
           </main>
           <Toaster richColors position="top-center" />
           <PwaInstallPrompt />
+          <CareNotificationWatcher />
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

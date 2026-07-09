@@ -13,6 +13,7 @@ import {
   Trash2,
   Loader2,
   X,
+  CloudSun,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -47,6 +48,18 @@ const TYPE_ICONS: Record<string, typeof Droplets> = {
 const WEEKDAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const WEEKDAYS_FA = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
 
+interface WeatherInsight {
+  location: { city: string; country: string; name: string };
+  insight: {
+    summaryEn: string;
+    summaryFa: string;
+    avgTempNext3Days: number;
+    rainNext3DaysMm: number;
+    avgHumidityNext3Days: number;
+    adjustment: number;
+  };
+}
+
 export default function CalendarPage() {
   const { t, locale, direction } = useLanguage();
   const { user } = useAuth();
@@ -67,6 +80,34 @@ export default function CalendarPage() {
   const [newRecurring, setNewRecurring] = useState("");
   const [newPlantId, setNewPlantId] = useState("");
   const [saving, setSaving] = useState(false);
+  const [weather, setWeather] = useState<WeatherInsight | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+
+  const fetchWeather = useCallback(async () => {
+    if (!user?.city || !user?.country) {
+      setWeather(null);
+      setWeatherError("location");
+      return;
+    }
+    setWeatherLoading(true);
+    setWeatherError(null);
+    try {
+      const res = await fetch("/api/weather");
+      const data = await res.json();
+      if (res.ok) {
+        setWeather(data);
+      } else if (data.code === "LOCATION_REQUIRED") {
+        setWeatherError("location");
+      } else {
+        setWeatherError("unavailable");
+      }
+    } catch {
+      setWeatherError("unavailable");
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, [user?.city, user?.country]);
 
   const fetchReminders = useCallback(async () => {
     if (!user) {
@@ -94,7 +135,8 @@ export default function CalendarPage() {
   useEffect(() => {
     fetchReminders();
     fetchPlants();
-  }, [fetchReminders, fetchPlants]);
+    fetchWeather();
+  }, [fetchReminders, fetchPlants, fetchWeather]);
 
   useEffect(() => {
     setCurrentMonth(getCurrentCalendarMonth(locale));
@@ -263,6 +305,43 @@ export default function CalendarPage() {
             {t.calendar.addReminder}
           </button>
         </div>
+      </div>
+
+      <div className="glass-card p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+          <CloudSun className="w-5 h-5 text-sky-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-muted-foreground">{t.calendar.weatherTitle}</p>
+          {weatherLoading ? (
+            <p className="text-sm mt-1">{t.calendar.weatherLoading}</p>
+          ) : weather ? (
+            <>
+              <p className="text-sm font-medium mt-1">
+                {weather.location.name}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {locale === "fa"
+                  ? weather.insight.summaryFa
+                  : weather.insight.summaryEn}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {t.calendar.weatherTemp}: {weather.insight.avgTempNext3Days}° ·{" "}
+                {t.calendar.weatherRain}: {weather.insight.rainNext3DaysMm} mm ·{" "}
+                {t.calendar.weatherHumidity}: {weather.insight.avgHumidityNext3Days}%
+              </p>
+            </>
+          ) : (
+            <p className="text-sm mt-1 text-muted-foreground">
+              {weatherError === "location"
+                ? t.calendar.weatherLocationRequired
+                : t.calendar.weatherUnavailable}
+            </p>
+          )}
+        </div>
+        <p className="text-xs text-emerald-600 dark:text-emerald-400 sm:max-w-[12rem]">
+          {t.calendar.weatherWateringHint}
+        </p>
       </div>
 
       <div className="flex gap-2 mb-4">

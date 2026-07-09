@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import { CareNotificationSettings } from "@/components/CareNotificationSettings";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
@@ -52,9 +53,13 @@ export default function SettingsPage() {
     });
     setSaving(false);
     if (res.ok) {
+      const data = await res.json();
       await update({ user: { name, country, city, bio } });
       await refreshUser();
       toast.success(t.settings.saved);
+      if (data.schedulesRegenerated > 0) {
+        toast.message(t.settings.schedulesRegenerated);
+      }
     } else {
       toast.error(t.common.error);
     }
@@ -114,6 +119,8 @@ export default function SettingsPage() {
           <OAuthButtons callbackUrl="/settings" />
         </CardContent>
       </Card>
+
+      <CareNotificationSettings />
 
       <Card className="glass-card border-0">
         <CardHeader>

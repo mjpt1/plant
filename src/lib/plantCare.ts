@@ -5,6 +5,7 @@ import {
 } from "@/lib/carePlan";
 import type { CareGuideItem } from "@/types";
 import { parseJson, toJsonValue } from "@/lib/jsonFields";
+import { fetchWeatherForLocation } from "@/lib/weather";
 
 export async function applyCarePlan(plantId: string, userId: string) {
   const [plant, user] = await Promise.all([
@@ -20,6 +21,7 @@ export async function applyCarePlan(plantId: string, userId: string) {
   const country = user?.country || "Iran";
   const city = user?.city || "Tehran";
   const careGuide = parseJson<CareGuideItem | null>(plant.careGuide, null);
+  const weather = await fetchWeatherForLocation(city, country);
 
   const { tasks, climate } = buildCarePlan({
     plantNameEn: plant.nameEn,
@@ -29,6 +31,7 @@ export async function applyCarePlan(plantId: string, userId: string) {
     country,
     city,
     careGuide,
+    weather,
   });
 
   await prisma.plant.update({
@@ -40,7 +43,13 @@ export async function applyCarePlan(plantId: string, userId: string) {
     where: { plantId, userId, completed: false },
   });
 
-  const reminderData = generateRemindersFromPlan(tasks, plantId, userId);
+  const reminderData = generateRemindersFromPlan(
+    tasks,
+    plantId,
+    userId,
+    90,
+    weather
+  );
   if (reminderData.length > 0) {
     await prisma.careReminder.createMany({
       data: reminderData.map((r) => ({
@@ -56,5 +65,19 @@ export async function applyCarePlan(plantId: string, userId: string) {
     });
   }
 
-  return { tasks, climate };
+  return { tasks, climate, weather };
+}
+
+export async function regenerateAllCarePlansForUser(userId: string) {
+  const plants = await prisma.plant.findMany({
+    where: { userId },
+    select: { id: true },
+  });
+
+  const results = [];
+  for (const plant of plants) {
+    const result = await applyCarePlan(plant.id, userId);
+    if (result) results.push(plant.id);
+  }
+  return results;
 }

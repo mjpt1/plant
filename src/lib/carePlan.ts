@@ -1,4 +1,9 @@
 import type { CareGuideItem } from "@/types";
+import {
+  computeWateringAdjustment,
+  shiftPastRain,
+  type WeatherForecast,
+} from "@/lib/weather";
 
 export interface CarePlanTask {
   type: "watering" | "fertilizing" | "pruning" | "inspection" | "repotting";
@@ -13,6 +18,16 @@ export interface ClimateProfile {
   wateringMultiplier: number;
   labelEn: string;
   labelFa: string;
+  weather?: {
+    locationName: string;
+    adjustment: number;
+    summaryEn: string;
+    summaryFa: string;
+    avgTempNext3Days: number;
+    rainNext3DaysMm: number;
+    avgHumidityNext3Days: number;
+    fetchedAt: string;
+  };
 }
 
 export interface GeneratedReminder {
@@ -101,11 +116,44 @@ export function buildCarePlan(input: {
   country: string;
   city: string;
   careGuide?: CareGuideItem | null;
+  weather?: WeatherForecast | null;
 }): { tasks: CarePlanTask[]; climate: ClimateProfile } {
-  const climate = getClimateProfile(input.country, input.city);
+  const baseClimate = getClimateProfile(input.country, input.city);
+  const weatherInsight = input.weather
+    ? computeWateringAdjustment(input.weather)
+    : null;
+
+  const combinedMultiplier = weatherInsight
+    ? baseClimate.wateringMultiplier * weatherInsight.adjustment
+    : baseClimate.wateringMultiplier;
+
+  const climate: ClimateProfile = {
+    wateringMultiplier: combinedMultiplier,
+    labelEn: weatherInsight
+      ? `${baseClimate.labelEn} · ${weatherInsight.summaryEn}`
+      : baseClimate.labelEn,
+    labelFa: weatherInsight
+      ? `${baseClimate.labelFa} · ${weatherInsight.summaryFa}`
+      : baseClimate.labelFa,
+    weather: weatherInsight
+      ? {
+          locationName: input.weather!.locationName,
+          adjustment: weatherInsight.adjustment,
+          summaryEn: weatherInsight.summaryEn,
+          summaryFa: weatherInsight.summaryFa,
+          avgTempNext3Days: weatherInsight.avgTempNext3Days,
+          rainNext3DaysMm: weatherInsight.rainNext3DaysMm,
+          avgHumidityNext3Days: weatherInsight.avgHumidityNext3Days,
+          fetchedAt: input.weather!.fetchedAt.toISOString(),
+        }
+      : undefined,
+  };
+
   const waterDays = Math.max(
     2,
-    Math.round(baseWateringDays(input.healthStatus, input.environment) / climate.wateringMultiplier)
+    Math.round(
+      baseWateringDays(input.healthStatus, input.environment) / combinedMultiplier
+    )
   );
   const fertilizeDays = baseFertilizeDays(input.healthStatus);
 
@@ -115,8 +163,16 @@ export function buildCarePlan(input: {
       intervalDays: waterDays,
       titleEn: `Water ${input.plantNameEn}`,
       titleFa: `آبیاری ${input.plantNameFa}`,
-      notesEn: input.careGuide?.watering || `Every ${waterDays} days based on your local climate.`,
-      notesFa: input.careGuide?.watering || `هر ${waterDays} روز بر اساس آب‌وهوای محلی شما.`,
+      notesEn:
+        input.careGuide?.watering ||
+        (weatherInsight
+          ? `Every ${waterDays} days — adjusted for live weather in ${input.weather?.locationName}.`
+          : `Every ${waterDays} days based on your local climate.`),
+      notesFa:
+        input.careGuide?.watering ||
+        (weatherInsight
+          ? `هر ${waterDays} روز — با توجه به آب‌وهمای زندهٔ ${input.weather?.locationName}.`
+          : `هر ${waterDays} روز بر اساس آب‌وهوای محلی شما.`),
     },
     {
       type: "fertilizing",
@@ -166,7 +222,8 @@ export function generateRemindersFromPlan(
   tasks: CarePlanTask[],
   plantId: string,
   userId: string,
-  horizonDays = 90
+  horizonDays = 90,
+  weather?: WeatherForecast | null
 ): Array<GeneratedReminder & { plantId: string; userId: string }> {
   const reminders: Array<GeneratedReminder & { plantId: string; userId: string }> = [];
   const now = new Date();
@@ -178,6 +235,7 @@ export function generateRemindersFromPlan(
 
     if (task.type === "watering") {
       next.setDate(next.getDate() + 1);
+      next = shiftPastRain(next, weather);
     } else if (task.type === "fertilizing") {
       next.setDate(next.getDate() + task.intervalDays);
     } else {
@@ -186,13 +244,22 @@ export function generateRemindersFromPlan(
 
     let count = 0;
     while (next <= end && count < 12) {
+      const planned = new Date(next);
+      let scheduledAt = new Date(next);
+      if (task.type === "watering") {
+        scheduledAt = shiftPastRain(scheduledAt, weather);
+      }
+      const postponed =
+        task.type === "watering" &&
+        scheduledAt.getTime() !== planned.getTime();
+
       reminders.push({
         plantId,
         userId,
         type: task.type,
         titleEn: task.titleEn,
         titleFa: task.titleFa,
-        scheduledAt: new Date(next),
+        scheduledAt,
         recurring:
           task.intervalDays <= 7
             ? "weekly"
@@ -201,10 +268,15 @@ export function generateRemindersFromPlan(
             : task.intervalDays <= 31
             ? "monthly"
             : "monthly",
-        notes: task.notesFa,
+        notes: postponed
+          ? `${task.notesFa} (به‌خاطر باران به روز بعد موکول شد / postponed due to rain)`
+          : task.notesFa,
       });
 
       next = new Date(next.getTime() + task.intervalDays * 24 * 60 * 60 * 1000);
+      if (task.type === "watering") {
+        next = shiftPastRain(next, weather);
+      }
       count++;
     }
   }

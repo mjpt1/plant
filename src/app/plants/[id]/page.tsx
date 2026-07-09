@@ -52,7 +52,18 @@ interface PlantDetail {
   lastFertilizedAt: string | null;
   carePlan: {
     tasks: CarePlanTaskView[];
-    climate: { labelEn: string; labelFa: string };
+    climate: {
+      labelEn: string;
+      labelFa: string;
+      weather?: {
+        locationName: string;
+        summaryEn: string;
+        summaryFa: string;
+        avgTempNext3Days: number;
+        rainNext3DaysMm: number;
+        avgHumidityNext3Days: number;
+      };
+    };
   } | null;
   careReminders: CareReminderItem[];
   scanHistory: ScanHistoryItem[];
@@ -291,13 +302,31 @@ export default function PlantDetailPage() {
       </div>
 
       {climate && (
-        <div className="glass-card p-4 mb-6 flex items-center gap-3">
-          <MapPin className="w-5 h-5 text-emerald-500" />
-          <div>
-            <p className="text-xs text-muted-foreground">{t.plants.climateNote}</p>
-            <p className="text-sm font-medium">
-              {locale === "fa" ? climate.labelFa : climate.labelEn}
-            </p>
+        <div className="glass-card p-4 mb-6 flex items-start gap-3">
+          <MapPin className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <div>
+              <p className="text-xs text-muted-foreground">{t.plants.climateNote}</p>
+              <p className="text-sm font-medium">
+                {locale === "fa" ? climate.labelFa : climate.labelEn}
+              </p>
+            </div>
+            {climate.weather && (
+              <div className="text-xs text-muted-foreground border-t border-border/50 pt-2">
+                <p className="font-medium text-foreground mb-1">
+                  {t.plants.weatherForecast}
+                </p>
+                <p>
+                  {locale === "fa"
+                    ? climate.weather.summaryFa
+                    : climate.weather.summaryEn}
+                </p>
+                <p className="mt-1">
+                  {climate.weather.locationName} · {climate.weather.avgTempNext3Days}° ·{" "}
+                  {climate.weather.rainNext3DaysMm} mm
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

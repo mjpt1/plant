@@ -2,5 +2,11 @@
   "buildCommand": "node scripts/vercel-build.mjs",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "crons": [
+    {
+      "path": "/api/cron/notify-reminders",
+      "schedule": "*/15 * * * *"
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "plantcare-v5";
+const CACHE_NAME = "plantcare-v6";
 const STATIC_ASSETS = [
   "/offline",
   "/manifest.json",
@@ -19,6 +19,57 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload = {
+    title: "گیاه‌یار",
+    body: "یادآور مراقبت گیاه",
+    url: "/calendar",
+    tag: "care-reminder",
+    locale: "fa",
+  };
+
+  try {
+    payload = { ...payload, ...event.data.json() };
+  } catch {
+    payload.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: "/icons/icon.svg",
+      badge: "/icons/icon.svg",
+      tag: payload.tag,
+      data: { url: payload.url },
+      lang: payload.locale === "fa" ? "fa" : "en",
+      dir: payload.locale === "fa" ? "rtl" : "ltr",
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/calendar";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin)) {
+          client.focus();
+          if ("navigate" in client && typeof client.navigate === "function") {
+            return client.navigate(url);
+          }
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(url);
+      }
+    })
+  );
 });
 
 self.addEventListener("fetch", (event) => {

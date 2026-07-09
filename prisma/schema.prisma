@@ -51,8 +51,9 @@ model User {
   comments        Comment[]
   questions       Question[]
   answers         Answer[]
-  careReminders   CareReminder[]
-  likes           Like[]
+  careReminders     CareReminder[]
+  pushSubscriptions PushSubscription[]
+  likes             Like[]
   followers       Follow[]       @relation("Following")
   following       Follow[]       @relation("Followers")
   votes           Vote[]
@@ -265,15 +266,29 @@ model CareReminder {
   titleFa     String
   type        String
   scheduledAt DateTime
-  completed   Boolean  @default(false)
+  completed   Boolean   @default(false)
+  notifiedAt  DateTime?
   recurring   String?
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([userId])
   @@index([scheduledAt])
   @@index([completed])
+  @@index([notifiedAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Like {
