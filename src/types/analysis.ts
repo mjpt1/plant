@@ -7,6 +7,34 @@ export const healthStatusSchema = z.enum([
   "unknown",
 ]);
 
+export const analysisSpeciesSourceSchema = z.enum([
+  "plantnet",
+  "llm",
+  "catalog",
+  "none",
+]);
+
+export const analysisHealthSourceSchema = z.enum([
+  "vision",
+  "disease_model",
+  "heuristic",
+  "none",
+]);
+
+export const analysisMetaSchema = z.object({
+  speciesSource: analysisSpeciesSourceSchema.default("none"),
+  healthSource: analysisHealthSourceSchema.default("none"),
+  diseaseModelUsed: z.boolean().default(false),
+  diseaseModelLabels: z
+    .array(
+      z.object({
+        label: z.string(),
+        score: z.number().min(0).max(1),
+      })
+    )
+    .default([]),
+});
+
 export const plantAnalysisSchema = z.object({
   plant: z.object({
     commonName: z.string(),
@@ -41,9 +69,11 @@ export const plantAnalysisSchema = z.object({
     prevention: z.array(z.string()),
     warnings: z.array(z.string()),
   }),
+  meta: analysisMetaSchema.optional(),
 });
 
 export type PlantAnalysis = z.infer<typeof plantAnalysisSchema>;
+export type AnalysisMeta = z.infer<typeof analysisMetaSchema>;
 
 export type ImageScanType =
   | "leaf"
@@ -65,3 +95,10 @@ export const imageScanTypeSchema = z.enum([
   "pest",
   "full_plant",
 ]);
+
+/** Strip watering advice that LLMs often mis-label as disease. */
+export function sanitizeDiseaseLabels(labels: string[]): string[] {
+  const wateringPattern =
+    /under\s*water|over\s*water|کم\s*آبی|کم‌آبی|آبیاری\s*کم|آبیاری\s*زیاد|آب\s*دهی|water(?:ing)?\s*(?:too\s*)?(?:little|much|more|less)/i;
+  return labels.filter((label) => !wateringPattern.test(label));
+}

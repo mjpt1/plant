@@ -159,6 +159,7 @@ export async function POST(request: NextRequest) {
         plant: analysis.plant.confidence,
         health: analysis.health.confidence,
       },
+      meta: analysis.meta,
     });
 
     return NextResponse.json(response);

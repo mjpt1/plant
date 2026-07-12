@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { localizeAnalysisResult } from "@/lib/plant-locale";
+import { DiagnosisFeedbackPanel } from "@/components/scan/DiagnosisFeedbackPanel";
 
 type ScanStep = "capture" | "analyzing" | "results";
 type ResultTab = "plant" | "health" | "care" | "treatment";
@@ -303,7 +304,10 @@ export default function ScanPage() {
       const data = await res.json();
       clearInterval(stepInterval);
       if (!res.ok) throw new Error(data.error || t.scan.errors.analysisFailed);
-      setResult(data.data);
+      setResult({
+        ...data.data,
+        meta: data.meta || data.data?.meta,
+      });
       setScanId(data.scanId || null);
       if (data.imageUrl && isPersistedImageUrl(data.imageUrl)) {
         setImagePreview(data.imageUrl);
@@ -414,6 +418,7 @@ export default function ScanPage() {
           health: data.scan.health,
           care: data.scan.care,
           treatment: data.scan.treatment,
+          meta: data.scan.meta,
         });
         setScanId(data.scan.id);
         const storedUrl = data.scan.imageUrl as string;
@@ -825,10 +830,32 @@ export default function ScanPage() {
                   <Badge variant={healthVariant(displayResult.health.status)}>
                     {getHealthStatusLabel(displayResult.health.status, t)}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {formatPercent(displayResult.health.confidence)} {t.scan.results.confidence}
-                  </span>
+                  <Badge variant="outline">
+                    {t.scan.results.plantConfidence}:{" "}
+                    {formatPercent(displayResult.plant.confidence)}
+                  </Badge>
+                  <Badge variant="outline">
+                    {t.scan.results.healthConfidence}:{" "}
+                    {formatPercent(displayResult.health.confidence)}
+                  </Badge>
                 </div>
+                {displayResult.meta && (
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span>
+                      {t.scan.results.speciesSource}:{" "}
+                      {t.scan.results.sources[
+                        displayResult.meta.speciesSource as keyof typeof t.scan.results.sources
+                      ] || displayResult.meta.speciesSource}
+                    </span>
+                    <span>·</span>
+                    <span>
+                      {t.scan.results.healthSource}:{" "}
+                      {t.scan.results.sources[
+                        displayResult.meta.healthSource as keyof typeof t.scan.results.sources
+                      ] || displayResult.meta.healthSource}
+                    </span>
+                  </div>
+                )}
                 {displayResult.health.soilAnalysis && (
                   <div>
                     <h4 className="font-medium mb-1 text-sm">{t.scan.results.soil}</h4>
@@ -881,6 +908,7 @@ export default function ScanPage() {
                   displayResult.health.status !== "healthy" && (
                     <p className="text-sm text-muted-foreground">{t.scan.results.healthUncertain}</p>
                   )}
+                {scanId && <DiagnosisFeedbackPanel scanId={scanId} />}
               </CardContent>
             </Card>
           )}

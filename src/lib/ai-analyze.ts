@@ -1,4 +1,4 @@
-import { plantAnalysisSchema, type PlantAnalysis } from "@/types/analysis";
+import { plantAnalysisSchema, type PlantAnalysis, sanitizeDiseaseLabels } from "@/types/analysis";
 import { z } from "zod";
 import { formatBotanicalFamily } from "@/lib/botanical-family";
 import {
@@ -19,7 +19,30 @@ import {
   getHeuristicHealthAssessment,
   needsVisualHealthAssessment,
 } from "@/lib/plant-health-heuristics";
+import {
+  isDiseaseModelConfigured,
+  predictDiseaseFromImage,
+} from "@/lib/ml/disease-model";
 import type { Locale } from "@/i18n";
+
+function withMeta(
+  analysis: PlantAnalysis,
+  meta: NonNullable<PlantAnalysis["meta"]>
+): PlantAnalysis {
+  return {
+    ...analysis,
+    meta: {
+      speciesSource: meta.speciesSource ?? "none",
+      healthSource: meta.healthSource ?? "none",
+      diseaseModelUsed: meta.diseaseModelUsed ?? false,
+      diseaseModelLabels: meta.diseaseModelLabels ?? [],
+    },
+    health: {
+      ...analysis.health,
+      diseaseDiagnosis: sanitizeDiseaseLabels(analysis.health.diseaseDiagnosis),
+    },
+  };
+}
 
 function getPrimaryAnalysisKey(): string | undefined {
   return process.env.ANALYSIS_PRIMARY_KEY || process.env.OPENAI_API_KEY;
@@ -48,47 +71,50 @@ export function isDemoAiMode(): boolean {
 
 function getUnconfiguredAnalysis(locale?: string): PlantAnalysis {
   const fa = locale === "fa";
-  return {
-    plant: {
-      commonName: fa ? "شناسایی غیرفعال" : "Identification unavailable",
-      commonNameEn: "Identification unavailable",
-      commonNameFa: "شناسایی غیرفعال",
-      scientificName: "",
-      family: "",
-      confidence: 0,
-      description: "",
-      category: "",
-      uses: "",
+  return withMeta(
+    {
+      plant: {
+        commonName: fa ? "شناسایی غیرفعال" : "Identification unavailable",
+        commonNameEn: "Identification unavailable",
+        commonNameFa: "شناسایی غیرفعال",
+        scientificName: "",
+        family: "",
+        confidence: 0,
+        description: "",
+        category: "",
+        uses: "",
+      },
+      health: {
+        status: "unknown",
+        possibleProblems: [],
+        diseaseDiagnosis: [],
+        pestDiagnosis: [],
+        soilAnalysis: fa
+          ? "برای تحلیل تصویر، کلید PlantNet یا سرویس تحلیل را در تنظیمات سرور وارد کنید."
+          : "Configure PlantNet or an analysis API key on the server to analyze images.",
+        confidence: 0,
+      },
+      care: {
+        watering: "—",
+        light: "—",
+        soil: "—",
+        fertilizer: "—",
+        temperature: "—",
+        humidity: "—",
+      },
+      treatment: {
+        immediateActions: [],
+        stepByStepPlan: [],
+        prevention: [],
+        warnings: [
+          fa
+            ? "سرویس شناسایی گیاه پیکربندی نشده است."
+            : "Plant identification service is not configured.",
+        ],
+      },
     },
-    health: {
-      status: "unknown",
-      possibleProblems: [],
-      diseaseDiagnosis: [],
-      pestDiagnosis: [],
-      soilAnalysis: fa
-        ? "برای تحلیل تصویر، کلید PlantNet یا سرویس تحلیل را در تنظیمات سرور وارد کنید."
-        : "Configure PlantNet or an analysis API key on the server to analyze images.",
-      confidence: 0,
-    },
-    care: {
-      watering: "—",
-      light: "—",
-      soil: "—",
-      fertilizer: "—",
-      temperature: "—",
-      humidity: "—",
-    },
-    treatment: {
-      immediateActions: [],
-      stepByStepPlan: [],
-      prevention: [],
-      warnings: [
-        fa
-          ? "سرویس شناسایی گیاه پیکربندی نشده است."
-          : "Plant identification service is not configured.",
-      ],
-    },
-  };
+    { speciesSource: "none", healthSource: "none", diseaseModelUsed: false, diseaseModelLabels: [] }
+  );
 }
 
 function buildPlantDescription(
@@ -268,78 +294,86 @@ function buildAnalysisFromCatalog(
     localizePlantText(catalog?.fertilizerGuide, lang) ||
     (fa ? "طبق فصل رشد" : "During growing season");
 
-  return {
-    plant: {
-      commonName,
-      commonNameEn,
-      commonNameFa,
-      scientificName:
-        catalog?.scientificName ||
-        identification.scientificNameWithAuthor ||
-        identification.scientificName,
-      family: botanicalFamily,
-      confidence,
-      description: buildPlantDescription(catalog, identification, locale),
-      category: localizeCategory(
-        catalog?.category || "",
-        catalog?.categoryFa,
-        lang
-      ),
-      uses: buildPlantUses(catalog, locale),
+  return withMeta(
+    {
+      plant: {
+        commonName,
+        commonNameEn,
+        commonNameFa,
+        scientificName:
+          catalog?.scientificName ||
+          identification.scientificNameWithAuthor ||
+          identification.scientificName,
+        family: botanicalFamily,
+        confidence,
+        description: buildPlantDescription(catalog, identification, locale),
+        category: localizeCategory(
+          catalog?.category || "",
+          catalog?.categoryFa,
+          lang
+        ),
+        uses: buildPlantUses(catalog, locale),
+      },
+      health: {
+        status: "unknown",
+        possibleProblems: [],
+        diseaseDiagnosis:
+          imageType === "pest"
+            ? [
+                fa
+                  ? "برای تشخیص دقیق آفت، تصویر نزدیک‌تر از برگ یا ساقه بگیرید."
+                  : "Take a closer photo of leaves or stems for pest diagnosis.",
+              ]
+            : [],
+        pestDiagnosis: [],
+        soilAnalysis:
+          imageType === "soil"
+            ? fa
+              ? "تحلیل خاک از روی تصویر محدود است؛ نمونه خاک را هم بررسی کنید."
+              : "Soil analysis from photos is limited; inspect a soil sample too."
+            : fa
+              ? "وضعیت سلامت از تصویر به‌طور کامل مشخص نیست. برای تشخیص بیماری عکس نزدیک از برگ بگیرید."
+              : "Health status cannot be fully assessed from this photo. Take a closer leaf photo for disease checks.",
+        confidence: Math.max(20, Math.round(confidence * 0.5)),
+      },
+      care: {
+        watering,
+        light,
+        soil,
+        fertilizer,
+        temperature: fa ? "۱۸ تا ۲۷ درجه سانتی‌گراد" : "18–27°C typical for houseplants",
+        humidity: fa ? "بسته به گونه متفاوت است" : "Varies by species",
+      },
+      treatment: {
+        immediateActions: [
+          fa
+            ? "برگ‌های آسیب‌دیده را جدا کنید و بهداشت ابزار را رعایت کنید."
+            : "Remove damaged leaves and sanitize pruning tools.",
+        ],
+        stepByStepPlan: [
+          fa
+            ? "گیاه را در کتابخانه گیاه‌یار جستجو کنید."
+            : "Search this plant in the GiahYar library.",
+          fa
+            ? "برنامه مراقبت را به تقویم اضافه کنید."
+            : "Add a care schedule to your calendar.",
+          fa
+            ? "برای تشخیص بیماری، عکس نزدیک از ناحیهٔ آسیب‌دیده بگیرید."
+            : "For disease checks, take a close-up of affected tissue.",
+        ],
+        prevention: catalog?.toxicity
+          ? [localizePlantText(catalog.toxicity, lang) || catalog.toxicity]
+          : [fa ? "از آب‌دهی بیش از حد پرهیز کنید." : "Avoid overwatering."],
+        warnings: [],
+      },
     },
-    health: {
-      status: "unknown",
-      possibleProblems: [],
-      diseaseDiagnosis:
-        imageType === "pest"
-          ? [
-              fa
-                ? "برای تشخیص دقیق آفت، تصویر نزدیک‌تر از برگ یا ساقه بگیرید."
-                : "Take a closer photo of leaves or stems for pest diagnosis.",
-            ]
-          : [],
-      pestDiagnosis: [],
-      soilAnalysis:
-        imageType === "soil"
-          ? fa
-            ? "تحلیل خاک از روی تصویر محدود است؛ نمونه خاک را هم بررسی کنید."
-            : "Soil analysis from photos is limited; inspect a soil sample too."
-          : fa
-            ? "وضعیت سلامت از تصویر به‌طور کامل مشخص نیست. برای تشخیص بیماری عکس نزدیک از برگ بگیرید."
-            : "Health status cannot be fully assessed from this photo. Take a closer leaf photo for disease checks.",
-      confidence: Math.max(20, Math.round(confidence * 0.5)),
-    },
-    care: {
-      watering,
-      light,
-      soil,
-      fertilizer,
-      temperature: fa ? "۱۸ تا ۲۷ درجه سانتی‌گراد" : "18–27°C typical for houseplants",
-      humidity: fa ? "بسته به گونه متفاوت است" : "Varies by species",
-    },
-    treatment: {
-      immediateActions: [
-        fa
-          ? "برگ‌های آسیب‌دیده را جدا کنید و بهداشت ابزار را رعایت کنید."
-          : "Remove damaged leaves and sanitize pruning tools.",
-      ],
-      stepByStepPlan: [
-        fa
-          ? "گیاه را در کتابخانه گیاه‌یار جستجو کنید."
-          : "Search this plant in the GiahYar library.",
-        fa
-          ? "برنامه مراقبت را به تقویم اضافه کنید."
-          : "Add a care schedule to your calendar.",
-        fa
-          ? "برای تشخیص بیماری، عکس نزدیک از ناحیهٔ آسیب‌دیده بگیرید."
-          : "For disease checks, take a close-up of affected tissue.",
-      ],
-      prevention: catalog?.toxicity
-        ? [localizePlantText(catalog.toxicity, lang) || catalog.toxicity]
-        : [fa ? "از آب‌دهی بیش از حد پرهیز کنید." : "Avoid overwatering."],
-      warnings: [],
-    },
-  };
+    {
+      speciesSource: "plantnet",
+      healthSource: "none",
+      diseaseModelUsed: false,
+      diseaseModelLabels: [],
+    }
+  );
 }
 
 const ANALYSIS_PROMPT = `You are an expert botanist and plant pathologist. Analyze this plant-related image and return ONLY valid JSON (no markdown) with this exact structure:
@@ -450,27 +484,42 @@ function extractHealthJson(content: string): z.infer<typeof healthOnlySchema> {
 
 function mergeHealthAnalysis(
   base: PlantAnalysis,
-  healthResult: z.infer<typeof healthOnlySchema>
+  healthResult: z.infer<typeof healthOnlySchema>,
+  healthSource: NonNullable<PlantAnalysis["meta"]>["healthSource"] = "vision"
 ): PlantAnalysis {
-  return {
-    ...base,
-    health: healthResult.health,
-    treatment: {
-      immediateActions:
-        healthResult.treatment.immediateActions.length > 0
-          ? healthResult.treatment.immediateActions
-          : base.treatment.immediateActions,
-      stepByStepPlan:
-        healthResult.treatment.stepByStepPlan.length > 0
-          ? healthResult.treatment.stepByStepPlan
-          : base.treatment.stepByStepPlan,
-      prevention:
-        healthResult.treatment.prevention.length > 0
-          ? healthResult.treatment.prevention
-          : base.treatment.prevention,
-      warnings: healthResult.treatment.warnings,
+  const diseaseDiagnosis = sanitizeDiseaseLabels(
+    healthResult.health.diseaseDiagnosis
+  );
+  return withMeta(
+    {
+      ...base,
+      health: {
+        ...healthResult.health,
+        diseaseDiagnosis,
+      },
+      treatment: {
+        immediateActions:
+          healthResult.treatment.immediateActions.length > 0
+            ? healthResult.treatment.immediateActions
+            : base.treatment.immediateActions,
+        stepByStepPlan:
+          healthResult.treatment.stepByStepPlan.length > 0
+            ? healthResult.treatment.stepByStepPlan
+            : base.treatment.stepByStepPlan,
+        prevention:
+          healthResult.treatment.prevention.length > 0
+            ? healthResult.treatment.prevention
+            : base.treatment.prevention,
+        warnings: healthResult.treatment.warnings,
+      },
     },
-  };
+    {
+      speciesSource: base.meta?.speciesSource || "plantnet",
+      healthSource,
+      diseaseModelUsed: base.meta?.diseaseModelUsed || false,
+      diseaseModelLabels: base.meta?.diseaseModelLabels || [],
+    }
+  );
 }
 
 function applyHeuristicHealth(
@@ -483,19 +532,34 @@ function applyHeuristicHealth(
     base.plant.category,
     (locale || "fa") as Locale
   );
-  if (!heuristic) return base;
+  if (!heuristic) {
+    return withMeta(base, {
+      speciesSource: base.meta?.speciesSource || "plantnet",
+      healthSource: "none",
+      diseaseModelUsed: base.meta?.diseaseModelUsed || false,
+      diseaseModelLabels: base.meta?.diseaseModelLabels || [],
+    });
+  }
 
-  return {
-    ...base,
-    health: {
-      status: heuristic.status,
-      possibleProblems: heuristic.possibleProblems,
-      diseaseDiagnosis: heuristic.diseaseDiagnosis,
-      pestDiagnosis: heuristic.pestDiagnosis,
-      soilAnalysis: heuristic.soilAnalysis,
-      confidence: heuristic.confidence,
+  return withMeta(
+    {
+      ...base,
+      health: {
+        status: heuristic.status,
+        possibleProblems: heuristic.possibleProblems,
+        diseaseDiagnosis: sanitizeDiseaseLabels(heuristic.diseaseDiagnosis),
+        pestDiagnosis: heuristic.pestDiagnosis,
+        soilAnalysis: heuristic.soilAnalysis,
+        confidence: heuristic.confidence,
+      },
     },
-  };
+    {
+      speciesSource: base.meta?.speciesSource || "plantnet",
+      healthSource: "heuristic",
+      diseaseModelUsed: base.meta?.diseaseModelUsed || false,
+      diseaseModelLabels: base.meta?.diseaseModelLabels || [],
+    }
+  );
 }
 
 async function analyzeHealthWithOpenAI(
@@ -610,18 +674,64 @@ async function enrichWithHealthAnalysis(
   imageType?: string,
   locale?: string
 ): Promise<PlantAnalysis> {
-  if (!hasLlmAnalysisConfigured()) {
-    if (needsVisualHealthAssessment(imageType)) {
-      return applyHeuristicHealth(base, imageType, locale);
+  // Always attempt disease CNN when configured (phase 2 stub).
+  let working = base;
+  if (isDiseaseModelConfigured()) {
+    const disease = await predictDiseaseFromImage(base64Image, mimeType, {
+      scientificName: base.plant.scientificName,
+      imageType,
+    });
+    if (disease.used) {
+      const fa = locale === "fa";
+      const labels = disease.labels.map((l) => l.label);
+      working = withMeta(
+        {
+          ...base,
+          health: {
+            ...base.health,
+            status: "warning",
+            diseaseDiagnosis: sanitizeDiseaseLabels(labels),
+            confidence: Math.round(
+              Math.max(...disease.labels.map((l) => l.score)) * 100
+            ),
+            soilAnalysis: fa
+              ? "تشخیص اولیه از مدل بیماری اختصاصی؛ جزئیات را با عکس نزدیک تأیید کنید."
+              : "Initial disease model prediction; confirm with a closer photo.",
+          },
+        },
+        {
+          speciesSource: base.meta?.speciesSource || "plantnet",
+          healthSource: "disease_model",
+          diseaseModelUsed: true,
+          diseaseModelLabels: disease.labels,
+        }
+      );
     }
-    return base;
+  }
+
+  const shouldAssess =
+    needsVisualHealthAssessment(imageType) ||
+    working.meta?.healthSource === "disease_model" ||
+    working.health.confidence < 55;
+
+  if (!hasLlmAnalysisConfigured()) {
+    if (shouldAssess && working.meta?.healthSource !== "disease_model") {
+      return applyHeuristicHealth(working, imageType, locale);
+    }
+    return working;
+  }
+
+  if (!shouldAssess && working.meta?.healthSource === "disease_model") {
+    // Still ask vision LLM to explain/treat when we have model labels.
+  } else if (!shouldAssess) {
+    return working;
   }
 
   const plantContext = {
-    commonName: base.plant.commonName,
-    scientificName: base.plant.scientificName,
-    family: base.plant.family,
-    category: base.plant.category || "",
+    commonName: working.plant.commonName,
+    scientificName: working.plant.scientificName,
+    family: working.plant.family,
+    category: working.plant.category || "",
   };
 
   try {
@@ -653,12 +763,36 @@ async function enrichWithHealthAnalysis(
         plantContext
       );
     }
-    return mergeHealthAnalysis(base, healthResult);
-  } catch {
-    if (needsVisualHealthAssessment(imageType)) {
-      return applyHeuristicHealth(base, imageType, locale);
+
+    // Prefer disease-model labels when present; let LLM fill treatment/explanation.
+    if (working.meta?.diseaseModelUsed && working.health.diseaseDiagnosis.length > 0) {
+      healthResult = {
+        ...healthResult,
+        health: {
+          ...healthResult.health,
+          diseaseDiagnosis: working.health.diseaseDiagnosis,
+          confidence: Math.max(
+            healthResult.health.confidence,
+            working.health.confidence
+          ),
+        },
+      };
+      const merged = mergeHealthAnalysis(working, healthResult, "disease_model");
+      return withMeta(merged, {
+        speciesSource: working.meta?.speciesSource || "plantnet",
+        healthSource: "disease_model",
+        diseaseModelUsed: true,
+        diseaseModelLabels: working.meta?.diseaseModelLabels || [],
+      });
     }
-    return base;
+
+    return mergeHealthAnalysis(working, healthResult, "vision");
+  } catch {
+    if (working.meta?.healthSource === "disease_model") return working;
+    if (needsVisualHealthAssessment(imageType)) {
+      return applyHeuristicHealth(working, imageType, locale);
+    }
+    return working;
   }
 }
 
@@ -793,49 +927,64 @@ async function analyzeWithPlantNet(
 
   if (!identification || identification.rejected) {
     const fa = locale === "fa";
-    return {
-      plant: {
-        commonName: fa ? "گیاه شناسایی نشد" : "Plant not identified",
-        commonNameEn: "Plant not identified",
-        commonNameFa: "گیاه شناسایی نشد",
-        scientificName: identification?.scientificNameWithAuthor || "",
-        family: identification?.family || "",
-        confidence: Math.round((identification?.score || 0) * 100),
-        description: fa
-          ? "با این تصویر گونه با اطمینان کافی شناسایی نشد. عکس واضح‌تری از برگ یا گل بگیرید."
-          : "Could not identify this species confidently. Take a clearer photo of a leaf or flower.",
-        category: "",
-        uses: "",
+    const base = withMeta(
+      {
+        plant: {
+          commonName: fa ? "گیاه شناسایی نشد" : "Plant not identified",
+          commonNameEn: "Plant not identified",
+          commonNameFa: "گیاه شناسایی نشد",
+          scientificName: identification?.scientificNameWithAuthor || "",
+          family: identification?.family || "",
+          confidence: Math.round((identification?.score || 0) * 100),
+          description: fa
+            ? "با این تصویر گونه با اطمینان کافی شناسایی نشد. عکس واضح‌تری از برگ یا گل بگیرید."
+            : "Could not identify this species confidently. Take a clearer photo of a leaf or flower.",
+          category: "",
+          uses: "",
+        },
+        health: {
+          status: "unknown",
+          possibleProblems: [],
+          diseaseDiagnosis: [],
+          pestDiagnosis: [],
+          soilAnalysis: fa
+            ? "گونه گیاه با اطمینان کافی شناسایی نشد."
+            : "Could not identify the plant species with enough confidence.",
+          confidence: 0,
+        },
+        care: {
+          watering: "—",
+          light: "—",
+          soil: "—",
+          fertilizer: "—",
+          temperature: "—",
+          humidity: "—",
+        },
+        treatment: {
+          immediateActions: [
+            fa
+              ? "عکس واضح‌تری از برگ یا گل بگیرید."
+              : "Take a clearer photo of a leaf or flower.",
+          ],
+          stepByStepPlan: [],
+          prevention: [],
+          warnings: [],
+        },
       },
-      health: {
-        status: "unknown",
-        possibleProblems: [],
-        diseaseDiagnosis: [],
-        pestDiagnosis: [],
-        soilAnalysis: fa
-          ? "گونه گیاه با اطمینان کافی شناسایی نشد."
-          : "Could not identify the plant species with enough confidence.",
-        confidence: 0,
-      },
-      care: {
-        watering: "—",
-        light: "—",
-        soil: "—",
-        fertilizer: "—",
-        temperature: "—",
-        humidity: "—",
-      },
-      treatment: {
-        immediateActions: [
-          fa
-            ? "عکس واضح‌تری از برگ یا گل بگیرید."
-            : "Take a clearer photo of a leaf or flower.",
-        ],
-        stepByStepPlan: [],
-        prevention: [],
-        warnings: [],
-      },
-    };
+      {
+        speciesSource: "plantnet",
+        healthSource: "none",
+        diseaseModelUsed: false,
+        diseaseModelLabels: [],
+      }
+    );
+    return enrichWithHealthAnalysis(
+      base,
+      base64Image,
+      mimeType,
+      imageType,
+      locale
+    );
   }
 
   const catalog = await findCatalogByScientificName(
@@ -878,16 +1027,61 @@ async function analyzeWithLlm(
         : "primary";
 
   try {
+    let result: PlantAnalysis;
     if (provider === "fallback") {
-      return await analyzeWithGemini(base64Image, mimeType, imageType, locale);
+      result = await analyzeWithGemini(base64Image, mimeType, imageType, locale);
+    } else {
+      result = await analyzeWithOpenAI(base64Image, mimeType, imageType, locale);
     }
-    return await analyzeWithOpenAI(base64Image, mimeType, imageType, locale);
+    result = withMeta(result, {
+      speciesSource: "llm",
+      healthSource: "vision",
+      diseaseModelUsed: false,
+      diseaseModelLabels: [],
+    });
+    return enrichWithHealthAnalysis(
+      result,
+      base64Image,
+      mimeType,
+      imageType,
+      locale
+    );
   } catch (primaryError) {
     if (provider === "primary" && getFallbackAnalysisKey()) {
-      return analyzeWithGemini(base64Image, mimeType, imageType, locale);
+      const result = withMeta(
+        await analyzeWithGemini(base64Image, mimeType, imageType, locale),
+        {
+          speciesSource: "llm",
+          healthSource: "vision",
+          diseaseModelUsed: false,
+          diseaseModelLabels: [],
+        }
+      );
+      return enrichWithHealthAnalysis(
+        result,
+        base64Image,
+        mimeType,
+        imageType,
+        locale
+      );
     }
     if (provider === "fallback" && getPrimaryAnalysisKey()) {
-      return analyzeWithOpenAI(base64Image, mimeType, imageType, locale);
+      const result = withMeta(
+        await analyzeWithOpenAI(base64Image, mimeType, imageType, locale),
+        {
+          speciesSource: "llm",
+          healthSource: "vision",
+          diseaseModelUsed: false,
+          diseaseModelLabels: [],
+        }
+      );
+      return enrichWithHealthAnalysis(
+        result,
+        base64Image,
+        mimeType,
+        imageType,
+        locale
+      );
     }
     throw primaryError;
   }

@@ -411,5 +411,6 @@ export function localizeAnalysisResult(
       prevention: localizeStringArray(analysis.treatment.prevention, locale),
       warnings: localizeStringArray(analysis.treatment.warnings, locale),
     },
+    meta: analysis.meta,
   };
 }

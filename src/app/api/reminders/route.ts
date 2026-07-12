@@ -111,6 +111,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
+import { recordCareOutcome } from "@/lib/ml/care-outcome";
+
 async function completeReminder(
   userId: string,
   reminder: {
@@ -132,6 +134,18 @@ async function completeReminder(
       plant: { select: { id: true, nameEn: true, nameFa: true } },
     },
   });
+
+  try {
+    await recordCareOutcome({
+      userId,
+      plantId: reminder.plantId,
+      reminderId: reminder.id,
+      type: reminder.type,
+      scheduledAt: reminder.scheduledAt,
+    });
+  } catch {
+    // Outcome logging must not block completing a reminder.
+  }
 
   if (reminder.plantId) {
     const activityField = getPlantActivityField(reminder.type);

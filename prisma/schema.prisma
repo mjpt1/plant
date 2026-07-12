@@ -51,15 +51,17 @@ model User {
   comments        Comment[]
   questions       Question[]
   answers         Answer[]
-  careReminders     CareReminder[]
-  pushSubscriptions PushSubscription[]
-  likes             Like[]
-  followers       Follow[]       @relation("Following")
-  following       Follow[]       @relation("Followers")
-  votes           Vote[]
-  reportsCreated  Report[]       @relation("ReportsCreated")
-  reportsReviewed Report[]       @relation("ReportsReviewed")
-  catalogAdded    PlantCatalog[] @relation("CatalogContributor")
+  careReminders       CareReminder[]
+  pushSubscriptions   PushSubscription[]
+  likes               Like[]
+  followers           Follow[]       @relation("Following")
+  following           Follow[]       @relation("Followers")
+  votes               Vote[]
+  reportsCreated      Report[]       @relation("ReportsCreated")
+  reportsReviewed     Report[]       @relation("ReportsReviewed")
+  catalogAdded        PlantCatalog[] @relation("CatalogContributor")
+  diagnosisFeedback   DiagnosisFeedback[]
+  careOutcomes        CareOutcome[]
 }
 
 model Account {
@@ -117,8 +119,9 @@ model Plant {
   acquiredAt       DateTime       @default(now())
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  scanHistory      ScanHistory[]
-  careReminders    CareReminder[]
+  scanHistory       ScanHistory[]
+  careReminders     CareReminder[]
+  careOutcomes      CareOutcome[]
 
   @@index([userId])
 }
@@ -175,10 +178,50 @@ model ScanHistory {
   healthData    Json
   careData      Json
   treatmentData Json
+  metaData      Json?
   createdAt     DateTime @default(now())
+  diagnosisFeedback DiagnosisFeedback[]
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model DiagnosisFeedback {
+  id               String   @id @default(cuid())
+  scanId           String
+  scan             ScanHistory @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wasCorrect       Boolean
+  correctedLabel   String?
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  @@unique([scanId, userId])
+  @@index([userId])
+  @@index([wasCorrect])
+}
+
+model CareOutcome {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plantId          String?
+  plant            Plant?   @relation(fields: [plantId], references: [id], onDelete: SetNull)
+  reminderId       String?
+  type             String
+  scheduledAt      DateTime
+  completedAt      DateTime
+  deltaDays        Int?
+  weatherTemp      Float?
+  weatherHumidity  Float?
+  weatherRainMm    Float?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@index([plantId])
+  @@index([type])
+  @@index([completedAt])
 }
 
 model Post {

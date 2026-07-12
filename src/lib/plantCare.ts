@@ -6,6 +6,7 @@ import {
 import type { CareGuideItem } from "@/types";
 import { parseJson, toJsonValue } from "@/lib/jsonFields";
 import { fetchWeatherForLocation } from "@/lib/weather";
+import { predictWateringIntervalDays } from "@/lib/ml/watering-predictor";
 
 export async function applyCarePlan(plantId: string, userId: string) {
   const [plant, user] = await Promise.all([
@@ -34,9 +35,30 @@ export async function applyCarePlan(plantId: string, userId: string) {
     weather,
   });
 
+  const wateringTask = tasks.find((t) => t.type === "watering");
+  let wateringPrediction = null;
+  if (wateringTask) {
+    wateringPrediction = await predictWateringIntervalDays({
+      userId,
+      plantId,
+      baseIntervalDays: wateringTask.intervalDays,
+      climateMultiplier: climate.wateringMultiplier,
+      weatherAdjustment: climate.weather?.adjustment,
+      environment: plant.environment,
+      healthStatus: plant.healthStatus,
+    });
+    wateringTask.intervalDays = wateringPrediction.intervalDays;
+    if (wateringPrediction.source === "ml_personal") {
+      wateringTask.notesEn = `${wateringTask.notesEn} (${wateringPrediction.reasonEn})`;
+      wateringTask.notesFa = `${wateringTask.notesFa} (${wateringPrediction.reasonFa})`;
+    }
+  }
+
   await prisma.plant.update({
     where: { id: plantId },
-    data: { carePlan: toJsonValue({ tasks, climate }) },
+    data: {
+      carePlan: toJsonValue({ tasks, climate, wateringPrediction }),
+    },
   });
 
   await prisma.careReminder.deleteMany({
@@ -65,7 +87,7 @@ export async function applyCarePlan(plantId: string, userId: string) {
     });
   }
 
-  return { tasks, climate, weather };
+  return { tasks, climate, weather, wateringPrediction };
 }
 
 export async function regenerateAllCarePlansForUser(userId: string) {

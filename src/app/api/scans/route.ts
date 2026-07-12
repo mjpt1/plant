@@ -14,6 +14,7 @@ function formatScan(scan: {
   healthData: unknown;
   careData: unknown;
   treatmentData: unknown;
+  metaData?: unknown;
   plantId: string | null;
   createdAt: Date;
 }) {
@@ -26,6 +27,7 @@ function formatScan(scan: {
     health: scan.healthData as PlantAnalysis["health"],
     care: scan.careData as PlantAnalysis["care"],
     treatment: scan.treatmentData as PlantAnalysis["treatment"],
+    meta: (scan.metaData as PlantAnalysis["meta"]) || undefined,
     createdAt: scan.createdAt.toISOString(),
   };
 }

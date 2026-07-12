@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { plantAnalysisSchema } from "@/types/analysis";
+import { analysisMetaSchema, plantAnalysisSchema } from "@/types/analysis";
 
 export const analyzeLocaleSchema = z.enum(["en", "fa"]);
 
@@ -14,6 +14,7 @@ export const analyzeResponseSchema = z.object({
     plant: z.number().min(0).max(100),
     health: z.number().min(0).max(100),
   }),
+  meta: analysisMetaSchema.optional(),
 });
 
 export type AnalyzeResponse = z.infer<typeof analyzeResponseSchema>;

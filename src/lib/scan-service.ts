@@ -56,6 +56,9 @@ export async function saveScanResult(input: {
       healthData: toJsonValue(input.analysis.health),
       careData: toJsonValue(input.analysis.care),
       treatmentData: toJsonValue(input.analysis.treatment),
+      metaData: input.analysis.meta
+        ? toJsonValue(input.analysis.meta)
+        : undefined,
     },
   });
 }
