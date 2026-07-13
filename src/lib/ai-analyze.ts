@@ -1,4 +1,4 @@
-import { plantAnalysisSchema, type PlantAnalysis, sanitizeDiseaseLabels } from "@/types/analysis";
+import { plantAnalysisSchema, type PlantAnalysis, sanitizeDiseaseLabels, reconcileHealthStatus } from "@/types/analysis";
 import { z } from "zod";
 import { formatBotanicalFamily } from "@/lib/botanical-family";
 import {
@@ -29,6 +29,15 @@ function withMeta(
   analysis: PlantAnalysis,
   meta: NonNullable<PlantAnalysis["meta"]>
 ): PlantAnalysis {
+  const diseaseDiagnosis = sanitizeDiseaseLabels(analysis.health.diseaseDiagnosis);
+  const health = {
+    ...analysis.health,
+    diseaseDiagnosis,
+    status: reconcileHealthStatus({
+      ...analysis.health,
+      diseaseDiagnosis,
+    }),
+  };
   return {
     ...analysis,
     meta: {
@@ -37,10 +46,7 @@ function withMeta(
       diseaseModelUsed: meta.diseaseModelUsed ?? false,
       diseaseModelLabels: meta.diseaseModelLabels ?? [],
     },
-    health: {
-      ...analysis.health,
-      diseaseDiagnosis: sanitizeDiseaseLabels(analysis.health.diseaseDiagnosis),
-    },
+    health,
   };
 }
 
@@ -50,6 +56,15 @@ function getPrimaryAnalysisKey(): string | undefined {
 
 function getFallbackAnalysisKey(): string | undefined {
   return process.env.ANALYSIS_FALLBACK_KEY || process.env.GEMINI_API_KEY;
+}
+
+function getGeminiModelCandidates(): string[] {
+  const preferred =
+    process.env.GEMINI_MODEL ||
+    process.env.ANALYSIS_GEMINI_MODEL ||
+    "gemini-2.0-flash";
+  const fallbacks = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+  return Array.from(new Set([preferred, ...fallbacks]));
 }
 
 function hasLlmAnalysisConfigured(): boolean {
@@ -412,7 +427,14 @@ const ANALYSIS_PROMPT = `You are an expert botanist and plant pathologist. Analy
   }
 }
 
-Your analysis MUST cover plant identification (including botanical family, description, and uses), disease signs, soil condition, pest signs, treatment plan, and confidence scores (0-100). Be specific and practical for home gardeners.`;
+Your analysis MUST cover plant identification (including botanical family, description, and uses), disease signs, soil condition, pest signs, treatment plan, and confidence scores (0-100). Be specific and practical for home gardeners.
+
+Critical disease rules:
+- diseaseDiagnosis: ONLY named pathology visible in the image (fungal spots, root rot, mosaic, bacterial ooze, rust, powdery mildew, etc.)
+- NEVER put watering advice in diseaseDiagnosis (no underwatering/overwatering/کم آبی/آبیاری کم unless crisp dry soil + severe wilt are unmistakable)
+- Put watering/light/nutrient suspects in possibleProblems only
+- If unsure, status="unknown" with empty diseaseDiagnosis — do not invent diseases
+- If healthy, status="healthy" and empty diagnosis arrays`;
 
 const HEALTH_ANALYSIS_PROMPT = `You are an expert plant pathologist. Analyze THIS image for visible disease, pest damage, nutrient deficiency, and environmental stress.
 
@@ -436,7 +458,7 @@ Return ONLY valid JSON (no markdown):
 
 Critical rules:
 - diseaseDiagnosis: ONLY specific pathology you can see (fungal spots, rot, mosaic virus, bacterial ooze, etc.)
-- NEVER put generic watering advice in diseaseDiagnosis (no "underwatering", "overwatering", "کم آبی", "آبیاری کم" unless crisp dry soil + wilt are clearly visible)
+- NEVER put generic watering advice in diseaseDiagnosis (no "underwatering", "overwatering", "کم آبی", "آبیاری کم", "کمبود آب" unless crisp dry soil + wilt are clearly visible)
 - possibleProblems may include watering/light/nutrient suspects as hypotheses, not confirmed diseases
 - If the plant looks healthy, status="healthy" and leave diagnosis arrays empty
 - Be conservative: when unsure, use status="unknown" rather than guessing`;
@@ -634,37 +656,50 @@ async function analyzeHealthWithGemini(
   const apiKey = getFallbackAnalysisKey();
   if (!apiKey) throw new Error("Fallback analysis key is not configured");
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: buildHealthPrompt(imageType, locale, plantContext) },
-              { inline_data: { mime_type: mimeType, data: base64Image } },
+  let lastError: Error | null = null;
+  for (const model of getGeminiModelCandidates()) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: buildHealthPrompt(imageType, locale, plantContext) },
+                  { inline_data: { mime_type: mimeType, data: base64Image } },
+                ],
+              },
             ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 2048,
-          responseMimeType: "application/json",
-        },
-      }),
-    }
-  );
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 2048,
+              responseMimeType: "application/json",
+            },
+          }),
+        }
+      );
 
-  if (!response.ok) {
-    throw new Error(`Health analysis error: ${response.status}`);
+      if (!response.ok) {
+        lastError = new Error(`Health analysis error: ${response.status} (${model})`);
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) {
+        lastError = new Error(`No health analysis response (${model})`);
+        continue;
+      }
+      return extractHealthJson(content);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
   }
 
-  const data = await response.json();
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) throw new Error("No health analysis response");
-  return extractHealthJson(content);
+  throw lastError || new Error("Health analysis failed");
 }
 
 async function enrichWithHealthAnalysis(
@@ -712,6 +747,8 @@ async function enrichWithHealthAnalysis(
   const shouldAssess =
     needsVisualHealthAssessment(imageType) ||
     working.meta?.healthSource === "disease_model" ||
+    working.meta?.speciesSource === "plantnet" ||
+    working.meta?.healthSource === "none" ||
     working.health.confidence < 55;
 
   if (!hasLlmAnalysisConfigured()) {
@@ -878,38 +915,55 @@ async function analyzeWithGemini(
   const apiKey = getFallbackAnalysisKey();
   if (!apiKey) throw new Error("Fallback analysis key is not configured");
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: buildPrompt(imageType, locale) },
-              { inline_data: { mime_type: mimeType, data: base64Image } },
+  let lastError: Error | null = null;
+  for (const model of getGeminiModelCandidates()) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: buildPrompt(imageType, locale) },
+                  { inline_data: { mime_type: mimeType, data: base64Image } },
+                ],
+              },
             ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 4096,
-          responseMimeType: "application/json",
-        },
-      }),
-    }
-  );
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 4096,
+              responseMimeType: "application/json",
+            },
+          }),
+        }
+      );
 
-  if (!response.ok) {
-    await response.text();
-    throw new Error(`Fallback analysis service error: ${response.status}`);
+      if (!response.ok) {
+        await response.text();
+        lastError = new Error(
+          `Fallback analysis service error: ${response.status} (${model})`
+        );
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) {
+        lastError = new Error(
+          `No response from fallback analysis service (${model})`
+        );
+        continue;
+      }
+      return extractJson(content);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
   }
 
-  const data = await response.json();
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) throw new Error("No response from fallback analysis service");
-  return extractJson(content);
+  throw lastError || new Error("Fallback analysis failed");
 }
 
 async function analyzeWithPlantNet(

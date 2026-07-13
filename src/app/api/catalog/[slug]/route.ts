@@ -5,6 +5,9 @@ import {
   getLocaleFromRequest,
   localizeCatalogPlant,
   localizePlantText,
+  localizeEnumValue,
+  SUN_FA,
+  WATER_FA,
 } from "@/lib/plant-locale";
 import type { Locale } from "@/i18n";
 
@@ -12,14 +15,18 @@ function expandGuide(
   short: string | null,
   fallback: string | null,
   locale: Locale,
-  templates: { en: (v: string) => string; fa: (v: string) => string }
+  templates: { en: (v: string) => string; fa: (v: string) => string },
+  enumMap?: Record<string, string>
 ): string | null {
   if (short && short.length > 20) {
     return localizePlantText(short, locale);
   }
   if (fallback) {
+    const localizedFallback = enumMap
+      ? localizeEnumValue(fallback, locale, enumMap) || fallback
+      : fallback;
     const template = locale === "fa" ? templates.fa : templates.en;
-    return localizePlantText(template(fallback), locale);
+    return localizePlantText(template(localizedFallback), locale);
   }
   return short ? localizePlantText(short, locale) : null;
 }
@@ -83,7 +90,8 @@ export async function GET(
           `Water when the top layer of soil feels dry. This plant typically needs ${v} watering — adjust for your climate and pot size.`,
         fa: (v) =>
           `وقتی لایهٔ بالایی خاک خشک شد آبیاری کنید. این گیاه معمولاً به آبیاری ${v} نیاز دارد — با توجه به آب‌وهوا و اندازهٔ گلدان تنظیم کنید.`,
-      }
+      },
+      WATER_FA
     );
     const lightGuide = expandGuide(
       plant.lightGuide,
@@ -94,7 +102,8 @@ export async function GET(
           `Place in ${v} light. Avoid harsh direct sun unless the species requires it.`,
         fa: (v) =>
           `در نور ${v} قرار دهید. از آفتاب مستقیم شدید پرهیز کنید مگر گونه به آن نیاز داشته باشد.`,
-      }
+      },
+      SUN_FA
     );
     const soilGuide = expandGuide(
       plant.soilGuide,

@@ -10,9 +10,9 @@ type HeuristicHealth = {
   confidence: number;
 };
 
-const ISSUES: Record<
+const HINTS: Record<
   string,
-  { fa: { problems: string[]; diseases: string[]; pests: string[] }; en: { problems: string[]; diseases: string[]; pests: string[] } }
+  { fa: { problems: string[]; pests: string[] }; en: { problems: string[]; pests: string[] } }
 > = {
   houseplant: {
     fa: {
@@ -21,12 +21,7 @@ const ISSUES: Record<
         "لبهٔ خشک برگ (نمک، کم‌آبی یا رطوبت کم)",
         "پژمردگی (ریشهٔ پوسیده یا کم‌آبی شدید)",
       ],
-      diseases: [
-        "لکه‌های قارچی روی برگ",
-        "پوسیدگی ریشه در خاک بسیار مرطوب",
-        "باکتریوز برگی (لبهٔ تیره و چروکیده)",
-      ],
-      pests: ["شپشک آردی", "شته", "کنه تار عنکبوتی", "سوسک برگ"],
+      pests: ["شپشک آردی", "شته", "کنه تار عنکبوتی"],
     },
     en: {
       problems: [
@@ -34,35 +29,26 @@ const ISSUES: Record<
         "Crispy leaf edges (salt, underwatering, or low humidity)",
         "Wilting (root rot or severe drought)",
       ],
-      diseases: [
-        "Fungal leaf spots",
-        "Root rot in waterlogged soil",
-        "Bacterial leaf spot (dark, water-soaked margins)",
-      ],
-      pests: ["Mealybugs", "Aphids", "Spider mites", "Scale insects"],
+      pests: ["Mealybugs", "Aphids", "Spider mites"],
     },
   },
   succulent: {
     fa: {
       problems: ["برگ‌های نرم و شفاف (آبیاری زیاد)", "کشیده شدن ساقه (نور کم)"],
-      diseases: ["پوسیدگی پایه ساقه", "قارچ سیاه روی برگ"],
       pests: ["شپشک آردی", "کنه"],
     },
     en: {
       problems: ["Soft translucent leaves (overwatering)", "Etiolated stretch (low light)"],
-      diseases: ["Stem base rot", "Black fungal spots on leaves"],
       pests: ["Mealybugs", "Mites"],
     },
   },
   herb: {
     fa: {
       problems: ["زردی بین رگبرگ‌ها (کمبود آهن)", "سوختگی برگ (آفتاب شدید)"],
-      diseases: ["سفیدک پودری", "زنگ زرد"],
       pests: ["شته", "کرم سبز"],
     },
     en: {
       problems: ["Interveinal yellowing (iron deficiency)", "Leaf scorch (intense sun)"],
-      diseases: ["Powdery mildew", "Rust"],
       pests: ["Aphids", "Caterpillars"],
     },
   },
@@ -72,24 +58,14 @@ const ISSUES: Record<
         "تغییر رنگ برگ بدون علت مشخص",
         "لکه، پوسیدگی یا چروکیدگی غیرعادی",
       ],
-      diseases: [
-        "عفونت قارچی (لکه‌های گرد قهوه‌ای یا سیاه)",
-        "باکتریوز (لبهٔ تیره و مرطوب)",
-        "ویروس (الگوی موزاییکی روی برگ)",
-      ],
-      pests: ["شته", "شپشک آردی", "کنه", "حشرات جویدنی"],
+      pests: ["شته", "شپشک آردی", "کنه"],
     },
     en: {
       problems: [
         "Unexplained leaf discoloration",
         "Spots, rot, or abnormal wilting",
       ],
-      diseases: [
-        "Fungal infection (round brown/black spots)",
-        "Bacterial blight (dark water-soaked edges)",
-        "Viral mosaic patterns on leaves",
-      ],
-      pests: ["Aphids", "Mealybugs", "Mites", "Chewing insects"],
+      pests: ["Aphids", "Mealybugs", "Mites"],
     },
   },
 };
@@ -117,10 +93,15 @@ export function needsVisualHealthAssessment(imageType?: string): boolean {
     imageType === "pest" ||
     imageType === "fruit" ||
     imageType === "root" ||
+    imageType === "flower" ||
     imageType === "full_plant"
   );
 }
 
+/**
+ * Conservative fallback when no vision LLM is available.
+ * Never invents a disease list from thin air — guides the user instead.
+ */
 export function getHeuristicHealthAssessment(
   imageType: ImageScanType | undefined,
   category: string | undefined,
@@ -129,13 +110,13 @@ export function getHeuristicHealthAssessment(
   if (!needsVisualHealthAssessment(imageType)) return null;
 
   const key = pickCategoryKey(category);
-  const pack = ISSUES[key] || ISSUES.default;
+  const pack = HINTS[key] || HINTS.default;
   const lang = locale === "fa" ? pack.fa : pack.en;
 
-  const note =
+  const visionNeeded =
     locale === "fa"
-      ? "این موارد رایج هستند — برای تشخیص دقیق از تصویر نزدیک برگ آسیب‌دیده استفاده کنید یا سرویس تحلیل بصری فعال کنید."
-      : "These are common possibilities — use a close-up of affected tissue for a precise diagnosis, or enable vision analysis.";
+      ? "برای تشخیص بیماری واقعی به سرویس تحلیل تصویری (Gemini/OpenAI) و عکس نزدیک از ناحیهٔ آسیب نیاز است. فعلاً فقط فرضیه‌های مراقبتی نمایش داده می‌شود."
+      : "Real disease diagnosis needs a vision service (Gemini/OpenAI) and a close-up of affected tissue. Showing care hypotheses only for now.";
 
   if (imageType === "pest") {
     return {
@@ -143,8 +124,8 @@ export function getHeuristicHealthAssessment(
       possibleProblems: lang.problems.slice(0, 2),
       diseaseDiagnosis: [],
       pestDiagnosis: lang.pests,
-      soilAnalysis: note,
-      confidence: 25,
+      soilAnalysis: visionNeeded,
+      confidence: 22,
     };
   }
 
@@ -162,23 +143,13 @@ export function getHeuristicHealthAssessment(
     };
   }
 
-  if (imageType === "full_plant") {
-    return {
-      status: "unknown",
-      possibleProblems: lang.problems.slice(0, 3),
-      diseaseDiagnosis: [],
-      pestDiagnosis: [],
-      soilAnalysis: note,
-      confidence: 20,
-    };
-  }
-
+  // leaf / stem / fruit / root / flower / full_plant — no fake disease dump
   return {
-    status: "warning",
-    possibleProblems: lang.problems,
-    diseaseDiagnosis: lang.diseases,
-    pestDiagnosis: lang.pests.slice(0, 2),
-    soilAnalysis: note,
-    confidence: 30,
+    status: "unknown",
+    possibleProblems: lang.problems.slice(0, 3),
+    diseaseDiagnosis: [],
+    pestDiagnosis: [],
+    soilAnalysis: visionNeeded,
+    confidence: 18,
   };
 }

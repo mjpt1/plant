@@ -8,6 +8,7 @@ describe("sanitizeDiseaseLabels", () => {
         "Powdery mildew",
         "Underwatering",
         "کم آبی",
+        "کمبود آب",
         "Root rot",
       ])
     ).toEqual(["Powdery mildew", "Root rot"]);

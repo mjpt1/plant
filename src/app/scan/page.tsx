@@ -87,7 +87,7 @@ export default function ScanPage() {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraStarting, setCameraStarting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageType, setImageType] = useState<ImageScanType>("full_plant");
+  const [imageType, setImageType] = useState<ImageScanType>("leaf");
   const [analysisStep, setAnalysisStep] = useState(0);
   const [result, setResult] = useState<PlantAnalysis | null>(null);
   const [scanId, setScanId] = useState<string | null>(null);

@@ -99,6 +99,33 @@ export const imageScanTypeSchema = z.enum([
 /** Strip watering advice that LLMs often mis-label as disease. */
 export function sanitizeDiseaseLabels(labels: string[]): string[] {
   const wateringPattern =
-    /under\s*water|over\s*water|کم\s*آبی|کم‌آبی|آبیاری\s*کم|آبیاری\s*زیاد|آب\s*دهی|water(?:ing)?\s*(?:too\s*)?(?:little|much|more|less)/i;
+    /under\s*water|over\s*water|کم\s*آبی|کم‌آبی|کمبود\s*آب|تشنگی|خشکی\s*خاک|آبیاری\s*(?:کم|زیاد|ناکافی|بیش\s*از\s*حد)|آب\s*دهی|water(?:ing)?\s*(?:stress|issue|problem)?|drought\s*stress|too\s*dry|too\s*wet|dehydrat/i;
   return labels.filter((label) => !wateringPattern.test(label));
+}
+
+/** After stripping watering mislabels, keep status consistent with remaining findings. */
+export function reconcileHealthStatus(health: {
+  status: "healthy" | "warning" | "critical" | "unknown";
+  diseaseDiagnosis: string[];
+  pestDiagnosis: string[];
+  possibleProblems: string[];
+}): "healthy" | "warning" | "critical" | "unknown" {
+  const diseases = sanitizeDiseaseLabels(health.diseaseDiagnosis);
+  const pests = health.pestDiagnosis.filter(Boolean);
+  const problems = health.possibleProblems.filter(Boolean);
+
+  if (diseases.length === 0 && pests.length === 0) {
+    if (health.status === "critical" || health.status === "warning") {
+      return problems.length > 0 ? "warning" : "unknown";
+    }
+    if (health.status === "healthy" && problems.length > 0) {
+      return "warning";
+    }
+  }
+  if (diseases.length > 0 || pests.length > 0) {
+    if (health.status === "healthy" || health.status === "unknown") {
+      return "warning";
+    }
+  }
+  return health.status;
 }

@@ -93,17 +93,49 @@ const EN_FA_PHRASES: [string, string][] = [
   ["Overview", "معرفی"],
   ["Care guide", "راهنمای مراقبت"],
   ["well-draining potting mix", "خاک گلدانی با زهکشی خوب"],
+  ["well draining potting mix", "خاک گلدانی با زهکشی خوب"],
   ["well-draining soil", "خاک با زهکشی خوب"],
+  ["well draining soil", "خاک با زهکشی خوب"],
+  ["potting mix", "خاک گلدان"],
   ["bright indirect light", "نور غیرمستقیم روشن"],
   ["bright indirect", "نور غیرمستقیم روشن"],
   ["partial shade", "نیمه‌سایه"],
+  ["partial sun", "آفتاب جزئی"],
   ["full sun", "آفتاب کامل"],
+  ["direct sun", "آفتاب مستقیم"],
   ["low light", "نور کم"],
   ["avoid overwatering", "از آبیاری بیش از حد پرهیز کنید"],
+  ["Allow the soil to dry", "اجازه دهید خاک خشک شود"],
+  ["keep the soil moist", "خاک را مرطوب نگه دارید"],
+  ["keep soil evenly moist", "خاک را به‌طور یکنواخت مرطوب نگه دارید"],
+  ["water regularly", "به‌طور منظم آبیاری کنید"],
+  ["water sparingly", "کم آبیاری کنید"],
+  ["once a week", "هفته‌ای یک‌بار"],
+  ["every two weeks", "هر دو هفته"],
+  ["every 1-2 weeks", "هر ۱ تا ۲ هفته"],
+  ["in the growing season", "در فصل رشد"],
+  ["in winter", "در زمستان"],
+  ["fertilize monthly", "ماهانه کود دهید"],
+  ["balanced fertilizer", "کود متعادل"],
+  ["liquid fertilizer", "کود مایع"],
+  ["diluted fertilizer", "کود رقیق‌شده"],
   ["toxic to pets", "سمی برای حیوانات خانگی"],
   ["toxic to cats", "سمی برای گربه"],
   ["toxic to dogs", "سمی برای سگ"],
   ["non-toxic", "غیرسمی"],
+  ["pet-friendly", "مناسب حیوانات خانگی"],
+  ["houseplant", "گیاه آپارتمانی"],
+  ["indoor plant", "گیاه داخلی"],
+  ["native to", "بومی"],
+  ["originates from", "منشأ آن"],
+  ["popular for", "محبوب به‌خاطر"],
+  ["known for", "شناخته‌شده به‌خاطر"],
+  ["easy to grow", "کشت آسان"],
+  ["easy care", "مراقبت آسان"],
+  ["low maintenance", "نگهداری آسان"],
+  ["air purifying", "تصفیهٔ هوا"],
+  ["trailing vines", "ساقه‌های آویز"],
+  ["variegated leaves", "برگ‌های ابلق"],
   ["Distribution:", "پراکنش:"],
   ["Uses:", "کاربرد:"],
   ["Life form:", "فرم رویشی:"],
@@ -112,16 +144,59 @@ const EN_FA_PHRASES: [string, string][] = [
   ["culinary", "خوراکی"],
   ["ornamental", "زینتی"],
   ["aromatic", "معطر"],
+  ["humidity", "رطوبت"],
+  ["temperature", "دما"],
+  ["pruning", "هرس"],
+  ["propagation", "تکثیر"],
+  ["by cuttings", "با قلمه"],
+  ["by division", "با تقسیم بوته"],
+  ["root rot", "پوسیدگی ریشه"],
+  ["powdery mildew", "سفیدک پودری"],
+  ["leaf spot", "لکه برگی"],
+  ["spider mites", "کنه تار عنکبوتی"],
+  ["mealybugs", "شپشک آردی"],
+  ["aphids", "شته"],
+];
+
+const EN_FA_WORDS: [string, string][] = [
+  ["watering", "آبیاری"],
+  ["fertilizer", "کود"],
+  ["fertilise", "کوددهی"],
+  ["fertilize", "کوددهی"],
+  ["drainage", "زهکشی"],
+  ["indirect", "غیرمستقیم"],
+  ["sunlight", "نور خورشید"],
+  ["leaves", "برگ‌ها"],
+  ["roots", "ریشه‌ها"],
+  ["moist", "مرطوب"],
+  ["weekly", "هفتگی"],
+  ["monthly", "ماهانه"],
+  ["indoor", "داخل خانه"],
+  ["outdoor", "فضای باز"],
+  ["tropical", "گرمسیری"],
+  ["perennial", "چندساله"],
+  ["species", "گونه"],
+  ["flowers", "گل‌ها"],
+  ["flower", "گل"],
+  ["soil", "خاک"],
+  ["light", "نور"],
+  ["plant", "گیاه"],
+  ["leaf", "برگ"],
+  ["root", "ریشه"],
+  ["shade", "سایه"],
+  ["water", "آب"],
 ];
 
 const FA_EN_PHRASES: [string, string][] = EN_FA_PHRASES.map(([en, fa]) => [fa, en]);
+
+export { SUN_FA, WATER_FA, DIFFICULTY_FA };
 
 function countPersianChars(text: string): number {
   return (text.match(new RegExp(PERSIAN_CHAR.source, "g")) || []).length;
 }
 
 export function isPrimarilyPersian(text: string): boolean {
-  const letters = text.replace(/[\s\d.,;:!?\-—()]/g, "");
+  const letters = text.replace(/[\s\d.,;:!?\-—()'"]/g, "");
   if (!letters.length) return false;
   return countPersianChars(letters) / letters.length > 0.35;
 }
@@ -229,8 +304,12 @@ export function localizeEnumValue(
 export function translateEnToFa(text: string): string {
   if (!text.trim() || isPrimarilyPersian(text)) return text;
   let out = text;
-  for (const [en, fa] of EN_FA_PHRASES) {
+  const phrases = [...EN_FA_PHRASES].sort((a, b) => b[0].length - a[0].length);
+  for (const [en, fa] of phrases) {
     out = out.replace(new RegExp(escapeRegExp(en), "gi"), fa);
+  }
+  for (const [en, fa] of EN_FA_WORDS) {
+    out = out.replace(new RegExp(`\\b${escapeRegExp(en)}\\b`, "gi"), fa);
   }
   return out;
 }
@@ -248,14 +327,45 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Structured FA blurb when free-form English text cannot be phrase-translated well. */
+export function buildFaCareBlurb(fields: {
+  displayName?: string;
+  waterRequirement?: string | null;
+  sunRequirement?: string | null;
+  difficulty?: string | null;
+  category?: string;
+}): string {
+  const water =
+    localizeEnumValue(fields.waterRequirement, "fa", WATER_FA) || "متوسط";
+  const light =
+    localizeEnumValue(fields.sunRequirement, "fa", SUN_FA) || "غیرمستقیم";
+  const difficulty =
+    localizeEnumValue(fields.difficulty, "fa", DIFFICULTY_FA) || "متوسط";
+  const name = fields.displayName || "این گیاه";
+  const category = fields.category
+    ? localizeCategory(fields.category, undefined, "fa")
+    : "گیاه زینتی";
+
+  return `${name} (${category}) معمولاً به آبیاری ${water} و نور ${light} نیاز دارد. سطح مراقبت: ${difficulty}. برای جزئیات بیشتر از راهنمای مراقبت همین صفحه استفاده کنید.`;
+}
+
 export function localizePlantText(
   text: string | null | undefined,
-  locale: Locale
+  locale: Locale,
+  fallbackFa?: string | null
 ): string | null {
   if (!text?.trim()) return null;
   const trimmed = text.trim();
   if (locale === "fa") {
-    return isPrimarilyPersian(trimmed) ? trimmed : translateEnToFa(trimmed);
+    if (isPrimarilyPersian(trimmed)) return trimmed;
+    const translated = translateEnToFa(trimmed);
+    if (isPrimarilyPersian(translated)) return translated;
+    // Long English catalog prose → prefer structured FA blurb over raw English
+    if (fallbackFa?.trim() && trimmed.length > 80) return fallbackFa.trim();
+    if (fallbackFa?.trim() && countPersianChars(translated) < 8) {
+      return fallbackFa.trim();
+    }
+    return translated;
   }
   return isPrimarilyPersian(trimmed) ? translateFaToEn(trimmed) : trimmed;
 }
@@ -270,12 +380,22 @@ export function localizeCatalogPlant<T extends PlantNameFields & PlantTextFields
     plant.categoryFa,
     locale
   );
+  const faBlurb =
+    locale === "fa"
+      ? buildFaCareBlurb({
+          displayName,
+          waterRequirement: plant.waterRequirement,
+          sunRequirement: plant.sunRequirement,
+          difficulty: plant.difficulty,
+          category: plant.category,
+        })
+      : null;
 
   return {
     ...plant,
     displayName,
     displayCategory,
-    displayDescription: localizePlantText(plant.description, locale),
+    displayDescription: localizePlantText(plant.description, locale, faBlurb),
     displayWateringGuide: localizePlantText(plant.wateringGuide, locale),
     displayLightGuide: localizePlantText(plant.lightGuide, locale),
     displayFertilizerGuide: localizePlantText(plant.fertilizerGuide, locale),
@@ -359,8 +479,14 @@ export function localizeAnalysisResult(
       ...analysis.plant,
       commonName: localizePlantName(plantFields, locale),
       description:
-        localizePlantText(analysis.plant.description, locale) ||
-        analysis.plant.description,
+        localizePlantText(
+          analysis.plant.description,
+          locale,
+          buildFaCareBlurb({
+            displayName: localizePlantName(plantFields, locale),
+            category: analysis.plant.category,
+          })
+        ) || analysis.plant.description,
       category: localizeCategory(
         analysis.plant.category || "",
         undefined,

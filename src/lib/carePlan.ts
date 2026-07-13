@@ -4,6 +4,7 @@ import {
   shiftPastRain,
   type WeatherForecast,
 } from "@/lib/weather";
+import { localizePlantText } from "@/lib/plant-locale";
 
 export interface CarePlanTask {
   type: "watering" | "fertilizing" | "pruning" | "inspection" | "repotting";
@@ -169,7 +170,7 @@ export function buildCarePlan(input: {
           ? `Every ${waterDays} days — adjusted for live weather in ${input.weather?.locationName}.`
           : `Every ${waterDays} days based on your local climate.`),
       notesFa:
-        input.careGuide?.watering ||
+        localizePlantText(input.careGuide?.watering, "fa") ||
         (weatherInsight
           ? `هر ${waterDays} روز — با توجه به آب‌وهمای زندهٔ ${input.weather?.locationName}.`
           : `هر ${waterDays} روز بر اساس آب‌وهوای محلی شما.`),
@@ -180,7 +181,9 @@ export function buildCarePlan(input: {
       titleEn: `Fertilize ${input.plantNameEn}`,
       titleFa: `کوددهی ${input.plantNameFa}`,
       notesEn: input.careGuide?.fertilizer || `Every ${fertilizeDays} days during growing season.`,
-      notesFa: input.careGuide?.fertilizer || `هر ${fertilizeDays} روز در فصل رشد.`,
+      notesFa:
+        localizePlantText(input.careGuide?.fertilizer, "fa") ||
+        `هر ${fertilizeDays} روز در فصل رشد.`,
     },
   ];
 
