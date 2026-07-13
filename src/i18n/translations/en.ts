@@ -16,6 +16,10 @@ export const en = {
     login: "Login",
     logout: "Logout",
     register: "Register",
+    more: "More",
+    menu: "Menu",
+    care: "Care",
+    community: "Community",
   },
   theme: {
     light: "Light",

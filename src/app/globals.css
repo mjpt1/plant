@@ -4,54 +4,64 @@
 
 @layer base {
   :root {
-    --background: 140 20% 98%;
-    --foreground: 140 30% 12%;
+    --background: 148 28% 97%;
+    --foreground: 155 32% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 140 30% 12%;
+    --card-foreground: 155 32% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 140 30% 12%;
-    --primary: 152 76% 36%;
+    --popover-foreground: 155 32% 12%;
+    --primary: 158 64% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 140 20% 94%;
-    --secondary-foreground: 140 30% 20%;
-    --muted: 140 15% 94%;
-    --muted-foreground: 140 10% 45%;
-    --accent: 152 40% 92%;
-    --accent-foreground: 152 76% 26%;
-    --destructive: 0 84% 60%;
+    --secondary: 148 22% 93%;
+    --secondary-foreground: 155 28% 18%;
+    --muted: 148 16% 93%;
+    --muted-foreground: 150 10% 42%;
+    --accent: 158 35% 92%;
+    --accent-foreground: 158 55% 24%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 140 15% 88%;
-    --input: 140 15% 88%;
-    --ring: 152 76% 36%;
-    --radius: 0.75rem;
-    --card-glass: rgba(255, 255, 255, 0.72);
-    --card-border: rgba(255, 255, 255, 0.35);
-    --emerald-glow: rgba(16, 185, 129, 0.15);
+    --border: 148 18% 86%;
+    --input: 148 18% 86%;
+    --ring: 158 64% 32%;
+    --radius: 1rem;
+    --card-glass: rgba(255, 255, 255, 0.78);
+    --card-border: rgba(255, 255, 255, 0.45);
+    --emerald-glow: rgba(16, 185, 129, 0.18);
+    --nav-glass: rgba(250, 253, 251, 0.82);
+    --dock-glass: rgba(255, 255, 255, 0.88);
+    --leaf-mist: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(52, 211, 153, 0.18), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 95% 5%, rgba(110, 231, 183, 0.12), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(16, 185, 129, 0.08), transparent 60%);
   }
 
   .dark {
-    --background: 140 25% 6%;
-    --foreground: 140 20% 92%;
-    --card: 140 20% 10%;
-    --card-foreground: 140 20% 92%;
-    --popover: 140 20% 10%;
-    --popover-foreground: 140 20% 92%;
-    --primary: 152 70% 42%;
+    --background: 155 28% 6%;
+    --foreground: 148 18% 94%;
+    --card: 155 22% 9%;
+    --card-foreground: 148 18% 94%;
+    --popover: 155 22% 9%;
+    --popover-foreground: 148 18% 94%;
+    --primary: 158 58% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 140 15% 14%;
-    --secondary-foreground: 140 20% 90%;
-    --muted: 140 15% 14%;
-    --muted-foreground: 140 10% 60%;
-    --accent: 152 30% 16%;
-    --accent-foreground: 152 60% 75%;
-    --destructive: 0 62% 50%;
+    --secondary: 155 16% 14%;
+    --secondary-foreground: 148 16% 92%;
+    --muted: 155 14% 14%;
+    --muted-foreground: 148 10% 62%;
+    --accent: 158 24% 15%;
+    --accent-foreground: 158 50% 72%;
+    --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 140 15% 18%;
-    --input: 140 15% 18%;
-    --ring: 152 70% 42%;
-    --card-glass: rgba(15, 25, 15, 0.75);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --emerald-glow: rgba(16, 185, 129, 0.1);
+    --border: 155 14% 16%;
+    --input: 155 14% 16%;
+    --ring: 158 58% 42%;
+    --card-glass: rgba(12, 22, 16, 0.78);
+    --card-border: rgba(255, 255, 255, 0.07);
+    --emerald-glow: rgba(16, 185, 129, 0.12);
+    --nav-glass: rgba(10, 18, 14, 0.86);
+    --dock-glass: rgba(14, 24, 18, 0.92);
+    --leaf-mist: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16, 185, 129, 0.14), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 95% 5%, rgba(52, 211, 153, 0.08), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(6, 95, 70, 0.2), transparent 60%);
   }
 
   * {
@@ -60,7 +70,10 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    background-image: var(--leaf-mist);
+    background-attachment: fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100dvh;
   }
 
   html[dir="rtl"] body {
@@ -68,7 +81,11 @@
   }
 
   html[dir="ltr"] body {
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "Figtree", system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: hsl(158 64% 32% / 0.22);
   }
 }
 
@@ -81,9 +98,19 @@
     @apply glass rounded-2xl shadow-lg shadow-emerald-500/5;
   }
 
+  .nav-glass {
+    background: var(--nav-glass);
+    @apply backdrop-blur-2xl border-b border-border/40;
+  }
+
+  .dock-glass {
+    background: var(--dock-glass);
+    @apply backdrop-blur-2xl border border-border/50 shadow-2xl shadow-emerald-900/10;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-           bg-gradient-to-r from-emerald-500 to-green-600 text-white font-medium
+           bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 text-white font-medium
            shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40
            hover:scale-[1.02] active:scale-[0.98] transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
@@ -131,6 +158,68 @@
     @apply absolute start-4 end-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent;
     animation: scan-sweep 2.5s ease-in-out infinite;
   }
+
+  .nav-link {
+    @apply relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium
+           text-muted-foreground transition-all duration-200
+           hover:text-foreground hover:bg-emerald-500/8;
+  }
+
+  .nav-link-active {
+    @apply text-emerald-700 dark:text-emerald-300 bg-emerald-500/12
+           shadow-[inset_0_0_0_1px] shadow-emerald-500/15;
+  }
+
+  .dock-item {
+    @apply relative flex flex-1 flex-col items-center justify-center gap-0.5
+           min-w-0 py-1.5 px-1 rounded-2xl transition-all duration-200
+           text-muted-foreground active:scale-95;
+  }
+
+  .dock-item-active {
+    @apply text-emerald-600 dark:text-emerald-400;
+  }
+
+  .dock-scan {
+    @apply relative -mt-7 flex h-14 w-14 items-center justify-center rounded-2xl
+           bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-700
+           text-white shadow-xl shadow-emerald-500/35
+           ring-4 ring-background transition-transform duration-200
+           active:scale-95 hover:scale-105;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+           text-muted-foreground transition-all duration-200
+           hover:bg-emerald-500/8 hover:text-foreground;
+  }
+
+  .sidebar-link-active {
+    @apply bg-gradient-to-l from-emerald-500/15 to-emerald-500/5 text-emerald-700
+           dark:text-emerald-300 shadow-[inset_3px_0_0_0] shadow-emerald-500;
+  }
+
+  html[dir="ltr"] .sidebar-link-active {
+    @apply bg-gradient-to-r shadow-[inset_3px_0_0_0];
+  }
+
+  .sheet-overlay {
+    @apply fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm
+           animate-fade-in;
+  }
+
+  .sheet-panel {
+    @apply fixed inset-x-0 bottom-0 z-[70] max-h-[82dvh] overflow-y-auto
+           rounded-t-3xl border border-border/60 bg-[var(--dock-glass)]
+           backdrop-blur-2xl shadow-2xl safe-bottom
+           animate-sheet-up;
+  }
+
+  .brand-mark {
+    @apply w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-700
+           flex items-center justify-center shadow-lg shadow-emerald-500/25
+           ring-1 ring-white/30;
+  }
 }
 
 @keyframes scan-pulse {
@@ -162,8 +251,58 @@
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dock-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @layer utilities {
   .animate-fade-in {
-    animation: fade-in 0.5s ease-out forwards;
+    animation: fade-in 0.35s ease-out forwards;
+  }
+
+  .animate-sheet-up {
+    animation: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-dock-pop {
+    animation: dock-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-sheet-up,
+  .animate-dock-pop,
+  .scan-ring,
+  .scan-line {
+    animation: none !important;
   }
 }

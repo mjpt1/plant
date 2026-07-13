@@ -59,13 +59,16 @@ export function LanguageSwitcher({
       disabled={disabled}
       onClick={toggleLocale}
       className={cn(
-        "p-2 rounded-xl hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-300",
+        "inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-emerald-500/10 transition-colors text-xs font-semibold",
         className
       )}
       aria-label={t.language.switchTo}
       title={locale === "en" ? t.language.fa : t.language.en}
     >
-      <Globe className="w-5 h-5" />
+      <Globe className="w-4 h-4" />
+      <span className="hidden sm:inline uppercase tracking-wide">
+        {locale === "en" ? "FA" : "EN"}
+      </span>
       <span className="sr-only">
         {locale === "en" ? t.language.fa : t.language.en}
       </span>

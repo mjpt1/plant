@@ -23,7 +23,7 @@ export function Providers({
       <LanguageProvider initialLocale={initialLocale}>
         <AuthProvider>
           <Navbar />
-          <main className="pt-16 pb-20 md:pb-8 min-h-screen">
+          <main className="pt-16 pb-28 md:pb-10 min-h-[100dvh]">
             <AppShell>{children}</AppShell>
           </main>
           <Toaster richColors position="top-center" />

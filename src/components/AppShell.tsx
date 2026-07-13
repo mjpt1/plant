@@ -25,6 +25,9 @@ const sidebarItems = [
   { href: "/plants", icon: Sprout, key: "myPlants" as const },
   { href: "/catalog", icon: BookOpen, key: "catalog" as const },
   { href: "/calendar", icon: Calendar, key: "calendar" as const },
+];
+
+const communityItems = [
   { href: "/social", icon: MessageCircle, key: "social" as const },
   { href: "/qa", icon: MessageCircleQuestion, key: "qa" as const },
 ];
@@ -40,75 +43,98 @@ export function AppSidebar() {
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 shrink-0 border-e border-border/50 glass h-[calc(100vh-4rem)] sticky top-16">
-      <div className="p-4 border-b border-border/50">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center">
-            <Leaf className="w-5 h-5 text-white" />
+    <aside className="hidden lg:flex flex-col w-[17.5rem] shrink-0 h-[calc(100vh-4.5rem)] sticky top-[4.5rem]">
+      <div className="m-3 flex flex-1 flex-col overflow-hidden rounded-3xl border border-border/50 glass shadow-xl shadow-emerald-900/5">
+        <div className="p-4 border-b border-border/40">
+          <Link href="/dashboard" className="flex items-center gap-3 group">
+            <div className="brand-mark group-hover:scale-105 transition-transform">
+              <Leaf className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-sm truncate">{t.app.name}</p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                @{user.username}
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          <div className="space-y-1">
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {t.nav.care}
+            </p>
+            {sidebarItems.map(({ href, icon: Icon, key }) => (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "sidebar-link",
+                  isActive(href) && "sidebar-link-active"
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {t.nav[key]}
+              </Link>
+            ))}
           </div>
-          <span className="font-bold text-sm">{t.app.name}</span>
-        </Link>
-      </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {sidebarItems.map(({ href, icon: Icon, key }) => (
+          <div className="space-y-1">
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {t.nav.community}
+            </p>
+            {communityItems.map(({ href, icon: Icon, key }) => (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "sidebar-link",
+                  isActive(href) && "sidebar-link-active"
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {t.nav[key]}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        <div className="p-3 border-t border-border/40 space-y-1">
           <Link
-            key={href}
-            href={href}
+            href="/settings"
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-              isActive(href)
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              "sidebar-link",
+              pathname === "/settings" && "sidebar-link-active"
             )}
           >
-            <Icon className="w-4 h-4" />
-            {t.nav[key]}
+            <Settings className="w-4 h-4" />
+            {t.dashboard.actions.settings}
           </Link>
-        ))}
-      </nav>
-
-      <div className="p-3 border-t border-border/50 space-y-1">
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-            pathname === "/settings"
-              ? "bg-primary/15 text-primary"
-              : "text-muted-foreground hover:bg-accent"
+          {(user.role === "EXPERT" || user.role === "ADMIN") && (
+            <Link
+              href="/expert"
+              className={cn(
+                "sidebar-link",
+                pathname.startsWith("/expert") && "sidebar-link-active"
+              )}
+            >
+              <BadgeCheck className="w-4 h-4" />
+              {t.expert.title}
+            </Link>
           )}
-        >
-          <Settings className="w-4 h-4" />
-          {t.dashboard.actions.settings}
-        </Link>
-        {(user.role === "EXPERT" || user.role === "ADMIN") && (
-          <Link
-            href="/expert"
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-              pathname.startsWith("/expert")
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-accent"
-            )}
-          >
-            <BadgeCheck className="w-4 h-4" />
-            {t.expert.title}
-          </Link>
-        )}
-        {user.role === "ADMIN" && (
-          <Link
-            href="/admin"
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-              pathname.startsWith("/admin")
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-accent"
-            )}
-          >
-            <Shield className="w-4 h-4" />
-            {t.admin.title}
-          </Link>
-        )}
+          {user.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className={cn(
+                "sidebar-link",
+                pathname.startsWith("/admin") && "sidebar-link-active"
+              )}
+            >
+              <Shield className="w-4 h-4" />
+              {t.admin.title}
+            </Link>
+          )}
+        </div>
       </div>
     </aside>
   );
@@ -122,9 +148,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto w-full flex gap-0 lg:gap-6 px-0 lg:px-6">
+    <div className="max-w-7xl mx-auto w-full flex gap-0 lg:gap-2 px-0 lg:px-4">
       <AppSidebar />
-      <div className="flex-1 min-w-0 w-full">{children}</div>
+      <div className="flex-1 min-w-0 w-full lg:pt-3">{children}</div>
     </div>
   );
 }

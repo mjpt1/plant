@@ -18,6 +18,10 @@ export const fa: TranslationKeys = {
     login: "ورود",
     logout: "خروج",
     register: "ثبت‌نام",
+    more: "بیشتر",
+    menu: "منو",
+    care: "مراقبت",
+    community: "جامعه",
   },
   theme: {
     light: "روشن",
