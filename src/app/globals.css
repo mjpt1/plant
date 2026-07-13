@@ -162,11 +162,11 @@
   .nav-link {
     @apply relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium
            text-muted-foreground transition-all duration-200
-           hover:text-foreground hover:bg-emerald-500/8;
+           hover:text-foreground hover:bg-emerald-500/10;
   }
 
   .nav-link-active {
-    @apply text-emerald-700 dark:text-emerald-300 bg-emerald-500/12
+    @apply text-emerald-700 dark:text-emerald-300 bg-emerald-500/10
            shadow-[inset_0_0_0_1px] shadow-emerald-500/15;
   }
 
@@ -183,7 +183,7 @@
   .dock-scan {
     @apply relative -mt-7 flex h-14 w-14 items-center justify-center rounded-2xl
            bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-700
-           text-white shadow-xl shadow-emerald-500/35
+           text-white shadow-xl shadow-emerald-500/40
            ring-4 ring-background transition-transform duration-200
            active:scale-95 hover:scale-105;
   }
@@ -191,7 +191,7 @@
   .sidebar-link {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
            text-muted-foreground transition-all duration-200
-           hover:bg-emerald-500/8 hover:text-foreground;
+           hover:bg-emerald-500/10 hover:text-foreground;
   }
 
   .sidebar-link-active {
