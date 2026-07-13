@@ -1,4 +1,4 @@
-const CACHE_NAME = "plantcare-v6";
+const CACHE_NAME = "plantcare-v7";
 const STATIC_ASSETS = [
   "/offline",
   "/manifest.json",
@@ -7,7 +7,13 @@ const STATIC_ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch(() => undefined)
+        )
+      )
+    )
   );
   self.skipWaiting();
 });

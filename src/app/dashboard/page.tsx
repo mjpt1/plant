@@ -19,6 +19,9 @@ import {
   ChevronLeft,
   Bell,
   MessageCircle,
+  Sun,
+  MessageSquareHeart,
+  Sparkles,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -115,6 +118,9 @@ export default function DashboardPage() {
     { href: "/plants/new", icon: Plus, label: t.dashboard.actions.addPlant, color: "from-teal-500 to-cyan-600" },
     { href: "/catalog", icon: BookOpen, label: t.dashboard.actions.browse, color: "from-lime-500 to-emerald-600" },
     { href: "/calendar", icon: Calendar, label: t.dashboard.actions.calendar, color: "from-green-500 to-teal-600" },
+    { href: "/light-meter", icon: Sun, label: t.nav.lightMeter, color: "from-amber-400 to-orange-500" },
+    { href: "/consultations", icon: MessageSquareHeart, label: t.nav.consultations, color: "from-rose-400 to-pink-500" },
+    { href: "/premium", icon: Sparkles, label: t.nav.premium, color: "from-violet-400 to-fuchsia-500" },
   ];
 
   const statCards = [
@@ -166,7 +172,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <h2 className="font-semibold mb-3">{t.dashboard.quickActions}</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
         {quickActions.map((action) => (
           <Link
             key={action.href}

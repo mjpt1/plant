@@ -9,7 +9,7 @@ import {
   parseBase64ImagePayload,
 } from "@/lib/image-validation";
 import { saveScanResult, uploadScanImage } from "@/lib/scan-service";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitAsync } from "@/lib/rate-limit";
 import { analyzeLocaleSchema, analyzeResponseSchema } from "@/types/analyze-api";
 import { imageScanTypeSchema } from "@/types/analysis";
 
@@ -40,7 +40,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const limit = rateLimit(`analyze:${user.id}`, ANALYZE_LIMIT, ANALYZE_WINDOW_MS);
+    const limit = await rateLimitAsync(
+      `analyze:${user.id}`,
+      ANALYZE_LIMIT,
+      ANALYZE_WINDOW_MS
+    );
     if (!limit.success) {
       return NextResponse.json(
         { error: "Too many scan requests. Please try again later." },

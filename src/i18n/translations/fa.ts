@@ -405,6 +405,7 @@ export const fa: TranslationKeys = {
     schedulesRegenerated: "برنامه مراقبت گیاهان با آب‌وهمای شهر جدید به‌روز شد",
     socialAccounts: "حساب‌های متصل",
     socialAccountsDesc: "گوگل، گیت‌هاب یا اینستاگرام را برای ورود سریع‌تر متصل کنید",
+    shortcuts: "ابزارها و امکانات",
     notifications: "یادآور مراقبت",
     notificationsDesc:
       "برای آبیاری، کوددهی، هرس و سایر کارهای برنامه‌ریزی‌شده مراقبت از گیاهان به شما اطلاع می‌دهیم.",
@@ -501,6 +502,15 @@ export const fa: TranslationKeys = {
     goToQa: "پاسخ به سؤالات",
     noPlants: "برای افزودن نکته، گیاه را جستجو کنید",
     stats: "آمار",
+    consultations: "مشاوره‌ها",
+    consultationsHint: "به مشاوره‌های باز کاربران پاسخ دهید.",
+    noConsultations: "هنوز مشاوره‌ای نیست",
+    openConsult: "باز",
+    answeredConsult: "پاسخ‌داده‌شده",
+    replyPlaceholder: "پاسخ کارشناسی بنویسید…",
+    sendReply: "ارسال پاسخ",
+    replySent: "پاسخ ارسال شد",
+    openFullConsultations: "صفحه کامل مشاوره‌ها",
   },
   report: {
     title: "گزارش محتوا",

@@ -403,6 +403,7 @@ export const en = {
     schedulesRegenerated: "Plant care schedules updated for your new city weather",
     socialAccounts: "Connected Accounts",
     socialAccountsDesc: "Link Google, GitHub, or Instagram for faster sign-in",
+    shortcuts: "Tools & features",
     notifications: "Care reminders",
     notificationsDesc:
       "Get notified for watering, fertilizing, pruning, and other scheduled plant care tasks.",
@@ -499,6 +500,15 @@ export const en = {
     goToQa: "Answer Questions",
     noPlants: "Search for a plant to add insights",
     stats: "Statistics",
+    consultations: "Consultations",
+    consultationsHint: "Reply to open plant-care consultations from users.",
+    noConsultations: "No consultations yet",
+    openConsult: "Open",
+    answeredConsult: "Answered",
+    replyPlaceholder: "Write your expert reply…",
+    sendReply: "Send reply",
+    replySent: "Reply sent",
+    openFullConsultations: "Open full consultations page",
   },
   report: {
     title: "Report Content",

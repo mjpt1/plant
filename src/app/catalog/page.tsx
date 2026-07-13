@@ -32,6 +32,7 @@ interface CatalogPlant {
   isIndoor: boolean;
   imageUrl: string | null;
   source: string;
+  toxicity: string | null;
 }
 
 interface CategoryCount {
@@ -190,6 +191,12 @@ export default function CatalogPage() {
                       {t.catalog.indoor}
                     </span>
                   )}
+                  {plant.toxicity &&
+                    !/non[- ]?toxic|غیرسمی|بی‌خطر/i.test(plant.toxicity) && (
+                      <span className="absolute bottom-2 left-2 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/90 text-white">
+                        {t.catalog.toxicity}
+                      </span>
+                    )}
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-sm">

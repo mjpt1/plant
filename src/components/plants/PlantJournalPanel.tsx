@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Loader2, BookOpen, Share2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, BookOpen, Share2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/context/LanguageContext";
 import { formatDateTime } from "@/utils/dateHelper";
@@ -18,9 +18,12 @@ export function PlantJournalPanel({ plantId }: { plantId: string }) {
   const fa = locale === "fa";
   const [entries, setEntries] = useState<Entry[]>([]);
   const [note, setNote] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,6 +42,21 @@ export function PlantJournalPanel({ plantId }: { plantId: string }) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  const clearPhoto = () => {
+    setImageFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   return (
     <div className="mb-8 space-y-3">
@@ -80,20 +98,48 @@ export function PlantJournalPanel({ plantId }: { plantId: string }) {
         className="glass-card p-3 space-y-2"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!note.trim()) return;
+          if (!note.trim() && !imageFile) return;
           setSaving(true);
           try {
+            let imageUrl: string | undefined;
+            if (imageFile) {
+              const fd = new FormData();
+              fd.append("file", imageFile);
+              const up = await fetch("/api/upload", { method: "POST", body: fd });
+              if (!up.ok) {
+                const err = await up.json().catch(() => ({}));
+                throw new Error(
+                  err.error ||
+                    (fa
+                      ? "آپلود تصویر ممکن نیست"
+                      : "Photo upload unavailable")
+                );
+              }
+              const uploaded = await up.json();
+              imageUrl = uploaded.url;
+            }
+
             const res = await fetch(`/api/plants/${plantId}/journal`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ note }),
+              body: JSON.stringify({
+                note: note.trim() || null,
+                imageUrl: imageUrl || null,
+              }),
             });
             if (!res.ok) throw new Error("fail");
             setNote("");
+            clearPhoto();
             toast.success(fa ? "ثبت شد" : "Saved");
             void load();
-          } catch {
-            toast.error(fa ? "خطا" : "Error");
+          } catch (err) {
+            toast.error(
+              err instanceof Error
+                ? err.message
+                : fa
+                  ? "خطا"
+                  : "Error"
+            );
           } finally {
             setSaving(false);
           }
@@ -110,10 +156,57 @@ export function PlantJournalPanel({ plantId }: { plantId: string }) {
               : "Today’s note: new leaf, watering, repot…"
           }
         />
-        <button type="submit" className="btn-primary text-sm" disabled={saving}>
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          {fa ? "افزودن به ژورنال" : "Add to journal"}
-        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            if (file && file.size > 10 * 1024 * 1024) {
+              toast.error(fa ? "حداکثر ۱۰ مگابایت" : "Max 10MB");
+              return;
+            }
+            setImageFile(file);
+          }}
+        />
+        {previewUrl && (
+          <div className="relative inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewUrl}
+              alt=""
+              className="h-24 w-24 rounded-lg object-cover"
+            />
+            <button
+              type="button"
+              className="absolute -top-1 -end-1 text-xs bg-black/60 text-white rounded-full w-5 h-5"
+              onClick={clearPhoto}
+              aria-label={fa ? "حذف عکس" : "Remove photo"}
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn-secondary text-sm"
+            onClick={() => fileRef.current?.click()}
+          >
+            <ImagePlus className="w-4 h-4" />
+            {fa ? "عکس پیشرفت" : "Progress photo"}
+          </button>
+          <button
+            type="submit"
+            className="btn-primary text-sm"
+            disabled={saving || (!note.trim() && !imageFile)}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {fa ? "افزودن به ژورنال" : "Add to journal"}
+          </button>
+        </div>
       </form>
 
       {loading ? (

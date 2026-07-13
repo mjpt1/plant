@@ -10,6 +10,7 @@ import {
   MessageCircleQuestion,
   BarChart3,
   BookOpen,
+  MessageSquareHeart,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -19,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { formatDateTime } from "@/utils/dateHelper";
 
 interface ExpertStats {
   answers: number;
@@ -37,12 +39,22 @@ interface CatalogPlant {
   expertInsight: string | null;
 }
 
+type Consultation = {
+  id: string;
+  subject: string;
+  message: string;
+  reply: string | null;
+  status: string;
+  createdAt: string;
+  user?: { name: string; username: string };
+};
+
 export default function ExpertPage() {
   const { user, loading: authLoading } = useAuth();
   const { t, locale } = useLanguage();
   const { formatNumber } = useLocaleFormat();
   const router = useRouter();
-  const [tab, setTab] = useState<"insights" | "stats">("insights");
+  const [tab, setTab] = useState<"insights" | "stats" | "consults">("insights");
   const [stats, setStats] = useState<ExpertStats | null>(null);
   const [query, setQuery] = useState("");
   const [plants, setPlants] = useState<CatalogPlant[]>([]);
@@ -50,6 +62,12 @@ export default function ExpertPage() {
   const [insight, setInsight] = useState("");
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [consults, setConsults] = useState<Consultation[]>([]);
+  const [consultsLoading, setConsultsLoading] = useState(false);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+
+  const fa = locale === "fa";
 
   const fetchStats = useCallback(async () => {
     const res = await fetch("/api/expert/stats");
@@ -65,6 +83,20 @@ export default function ExpertPage() {
     setSearching(false);
   }, []);
 
+  const loadConsults = useCallback(async () => {
+    setConsultsLoading(true);
+    try {
+      const res = await fetch("/api/consultations");
+      if (!res.ok) throw new Error("fail");
+      const data = await res.json();
+      setConsults(data.consultations || []);
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setConsultsLoading(false);
+    }
+  }, [t.common.error]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user || (user.role !== "EXPERT" && user.role !== "ADMIN")) {
@@ -79,6 +111,10 @@ export default function ExpertPage() {
     const timer = setTimeout(() => searchPlants(query), 300);
     return () => clearTimeout(timer);
   }, [query, searchPlants]);
+
+  useEffect(() => {
+    if (tab === "consults") void loadConsults();
+  }, [tab, loadConsults]);
 
   const selectPlant = (plant: CatalogPlant) => {
     setSelected(plant);
@@ -105,6 +141,8 @@ export default function ExpertPage() {
     }
   };
 
+  const openConsultCount = consults.filter((c) => c.status === "OPEN").length;
+
   if (authLoading || !user || (user.role !== "EXPERT" && user.role !== "ADMIN")) {
     return (
       <div className="flex justify-center py-24">
@@ -123,12 +161,31 @@ export default function ExpertPage() {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
-        <Button variant={tab === "insights" ? "default" : "outline"} size="sm" onClick={() => setTab("insights")}>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button
+          variant={tab === "insights" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("insights")}
+        >
           <BookOpen className="w-4 h-4" />
           {t.expert.insights}
         </Button>
-        <Button variant={tab === "stats" ? "default" : "outline"} size="sm" onClick={() => setTab("stats")}>
+        <Button
+          variant={tab === "consults" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("consults")}
+        >
+          <MessageSquareHeart className="w-4 h-4" />
+          {t.expert.consultations}
+          {tab === "consults" && openConsultCount > 0 ? (
+            <span className="ms-1 text-xs opacity-80">({formatNumber(openConsultCount)})</span>
+          ) : null}
+        </Button>
+        <Button
+          variant={tab === "stats" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("stats")}
+        >
           <BarChart3 className="w-4 h-4" />
           {t.expert.stats}
         </Button>
@@ -155,6 +212,104 @@ export default function ExpertPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {tab === "consults" && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t.expert.consultationsHint}</p>
+          {consultsLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : consults.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-10">
+              {t.expert.noConsultations}
+            </p>
+          ) : (
+            consults.map((c) => (
+              <Card key={c.id} className="glass-card border-0">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex flex-wrap items-center gap-2">
+                    <span>{c.subject}</span>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full ${
+                        c.status === "OPEN"
+                          ? "bg-amber-500/15 text-amber-700"
+                          : "bg-emerald-500/15 text-emerald-700"
+                      }`}
+                    >
+                      {c.status === "OPEN" ? t.expert.openConsult : t.expert.answeredConsult}
+                    </span>
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {c.user?.name || c.user?.username || "—"} ·{" "}
+                    {formatDateTime(c.createdAt, locale)}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm whitespace-pre-wrap">{c.message}</p>
+                  {c.reply ? (
+                    <div className="rounded-xl bg-emerald-500/10 p-3 text-sm">
+                      <p className="text-xs font-medium text-emerald-700 mb-1">
+                        {fa ? "پاسخ شما" : "Your reply"}
+                      </p>
+                      <p className="whitespace-pre-wrap">{c.reply}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Textarea
+                        rows={3}
+                        value={replyDrafts[c.id] || ""}
+                        onChange={(e) =>
+                          setReplyDrafts((prev) => ({ ...prev, [c.id]: e.target.value }))
+                        }
+                        placeholder={t.expert.replyPlaceholder}
+                      />
+                      <Button
+                        size="sm"
+                        disabled={
+                          replyingId === c.id || !(replyDrafts[c.id] || "").trim()
+                        }
+                        onClick={async () => {
+                          const reply = (replyDrafts[c.id] || "").trim();
+                          if (!reply) return;
+                          setReplyingId(c.id);
+                          try {
+                            const res = await fetch("/api/consultations", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: c.id, reply }),
+                            });
+                            if (!res.ok) throw new Error("fail");
+                            toast.success(t.expert.replySent);
+                            setReplyDrafts((prev) => {
+                              const next = { ...prev };
+                              delete next[c.id];
+                              return next;
+                            });
+                            void loadConsults();
+                          } catch {
+                            toast.error(t.common.error);
+                          } finally {
+                            setReplyingId(null);
+                          }
+                        }}
+                      >
+                        {replyingId === c.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : null}
+                        {t.expert.sendReply}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          )}
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href="/consultations">{t.expert.openFullConsultations}</Link>
+          </Button>
         </div>
       )}
 
@@ -219,7 +374,11 @@ export default function ExpertPage() {
                     placeholder={t.expert.insightPlaceholder}
                     rows={8}
                   />
-                  <Button onClick={saveInsight} disabled={saving || insight.trim().length < 10} className="w-full">
+                  <Button
+                    onClick={saveInsight}
+                    disabled={saving || insight.trim().length < 10}
+                    className="w-full"
+                  >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t.expert.saveInsight}
                   </Button>
                   <Button asChild variant="outline" className="w-full">

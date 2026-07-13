@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, User, Globe, Sun, Moon } from "lucide-react";
+import { Loader2, User, Globe, Sun, Moon, Gauge, MessageSquareHeart, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -121,6 +122,32 @@ export default function SettingsPage() {
       </Card>
 
       <CareNotificationSettings />
+
+      <Card className="glass-card border-0 mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">{t.settings.shortcuts}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/light-meter">
+              <Gauge className="w-4 h-4" />
+              {t.nav.lightMeter}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/consultations">
+              <MessageSquareHeart className="w-4 h-4" />
+              {t.nav.consultations}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/premium">
+              <Sparkles className="w-4 h-4" />
+              {t.nav.premium}
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card className="glass-card border-0">
         <CardHeader>
