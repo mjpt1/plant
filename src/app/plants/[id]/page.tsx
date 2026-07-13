@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { ScanThumbnail } from "@/components/scan/ScanThumbnail";
 import type { CarePlanTaskView, CareReminderItem } from "@/types";
 import { Button } from "@/components/ui/button";
+import { PlantJournalPanel } from "@/components/plants/PlantJournalPanel";
 
 interface ScanHistoryItem {
   id: string;
@@ -421,6 +422,8 @@ export default function PlantDetailPage() {
           {t.nav.calendar} →
         </Link>
       </div>
+
+      <PlantJournalPanel plantId={plant.id} />
 
       {plant.scanHistory.length > 0 && (
         <>

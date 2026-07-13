@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>دمو جهت بصری — گیاه‌یار پاستلی</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blush: #ff9ea0;
+      --peach: #ffb980;
+      --butter: #ffe566;
+      --sage: #7de2a8;
+      --mint: #9af0d0;
+      --lilac: #c9a8ff;
+      --sky: #7ec8ff;
+      --paper: #fff8f2;
+      --fog: #fff1e8;
+      --ink: #2f2a36;
+      --soft: #7a7385;
+      --accent: #ff6b7a;
+      --accent-deep: #e54d6a;
+      --joy: #35c98b;
+      --glass: rgba(255, 255, 255, 0.78);
+      --glass-strong: rgba(255, 255, 255, 0.9);
+      --stroke: rgba(47, 42, 54, 0.07);
+      --shadow-soft: 0 18px 40px rgba(255, 107, 122, 0.12);
+      --shadow-card: 0 10px 28px rgba(80, 60, 120, 0.08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "Vazirmatn", "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 520px at 8% -8%, #ffc4c8 0%, transparent 55%),
+        radial-gradient(700px 480px at 95% 5%, #b8e4ff 0%, transparent 50%),
+        radial-gradient(600px 400px at 70% 100%, #b8f5d2 0%, transparent 45%),
+        radial-gradient(500px 360px at 40% 80%, #ffe9a0 0%, transparent 50%),
+        linear-gradient(165deg, #fff8f2 0%, #fff0f5 45%, #f0f8ff 100%);
+      padding: 28px 16px 90px;
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; }
+
+    .banner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 28px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--glass-strong);
+      border: 1px solid var(--stroke);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-deep);
+      backdrop-filter: blur(12px);
+      margin-bottom: 10px;
+    }
+    .pill::before {
+      content: "";
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--joy);
+      box-shadow: 0 0 0 4px rgba(53, 201, 139, 0.25);
+    }
+    .banner h1 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+    .banner p {
+      margin-top: 10px;
+      color: var(--soft);
+      max-width: 48ch;
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+    .swatches {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .swatch {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .note {
+      background: var(--glass-strong);
+      border: 1px solid var(--stroke);
+      border-radius: 20px;
+      padding: 16px 18px;
+      font-size: 0.84rem;
+      color: var(--soft);
+      line-height: 1.75;
+      max-width: 300px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-card);
+    }
+    .note strong { color: var(--ink); display: block; margin-bottom: 4px; }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 36px;
+      justify-items: center;
+    }
+    @media (min-width: 980px) {
+      .stage {
+        grid-template-columns: auto 1fr;
+        align-items: start;
+        gap: 44px;
+      }
+    }
+
+    /* Phone frame — soft titanium feel */
+    .phone-col { width: min(100%, 390px); }
+    .phone {
+      width: 100%;
+      aspect-ratio: 9 / 19.5;
+      border-radius: 48px;
+      padding: 12px;
+      background: linear-gradient(160deg, #e8e0d8, #cfc6bc 40%, #b8aea4);
+      box-shadow:
+        var(--shadow-soft),
+        0 50px 100px rgba(90, 70, 60, 0.22),
+        inset 0 1px 0 rgba(255,255,255,0.55);
+      position: relative;
+    }
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 18px; left: 50%;
+      transform: translateX(-50%);
+      width: 108px; height: 32px;
+      background: #1c1917;
+      border-radius: 20px;
+      z-index: 50;
+    }
+    .screen {
+      height: 100%;
+      border-radius: 38px;
+      overflow: hidden;
+      position: relative;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+    }
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(420px 280px at 100% 0%, rgba(201, 168, 255, 0.45), transparent 60%),
+        radial-gradient(380px 260px at 0% 18%, rgba(255, 158, 160, 0.4), transparent 55%),
+        radial-gradient(360px 240px at 80% 70%, rgba(125, 226, 168, 0.35), transparent 50%),
+        radial-gradient(300px 200px at 30% 90%, rgba(255, 229, 102, 0.28), transparent 55%);
+    }
+
+    .status {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 26px 0;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: Nunito, Vazirmatn, sans-serif;
+    }
+    .status .icons { display: flex; gap: 6px; opacity: 0.75; }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .view { display: none; flex: 1; flex-direction: column; min-height: 0; }
+    .view.on { display: flex; animation: rise 0.4s ease; }
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 6px 0 108px;
+      scrollbar-width: none;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .greeting {
+      padding: 12px 22px 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .greeting .hi {
+      font-size: 0.8rem;
+      color: var(--soft);
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .greeting h2 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background:
+        linear-gradient(145deg, #ff9ea0, #c9a8ff 55%, #7ec8ff);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: white;
+      border: 2.5px solid white;
+      box-shadow: 0 8px 20px rgba(255, 107, 122, 0.3);
+      flex-shrink: 0;
+    }
+
+    .search {
+      margin: 12px 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.65);
+      border: 1px solid var(--stroke);
+      box-shadow: 0 6px 18px rgba(90, 70, 60, 0.05);
+      backdrop-filter: blur(10px);
+      color: var(--soft);
+      font-size: 0.88rem;
+    }
+    .search svg { opacity: 0.55; flex-shrink: 0; }
+
+    .mood-row {
+      display: flex;
+      gap: 10px;
+      padding: 14px 18px 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .mood-row::-webkit-scrollbar { display: none; }
+    .mood {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,0.55);
+      color: var(--ink);
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+    .mood.on {
+      background: white;
+      border-color: rgba(255, 107, 122, 0.35);
+      box-shadow: 0 6px 16px rgba(255, 107, 122, 0.2);
+      color: var(--accent-deep);
+    }
+
+    /* Soft hero card */
+    .story {
+      margin: 16px 18px 0;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      min-height: 168px;
+      background:
+        linear-gradient(135deg, rgba(61,53,48,0.15), rgba(61,53,48,0.45)),
+        url("https://images.unsplash.com/photo-1463320898484-cdee8141c787?w=800&q=80") center/cover;
+      box-shadow: var(--shadow-card);
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .story .tag {
+      align-self: flex-start;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(8px);
+      margin-bottom: auto;
+    }
+    .story h3 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.35;
+      max-width: 14ch;
+    }
+    .story p {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 20px 20px 10px;
+    }
+    .section-head h3 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .section-head a {
+      font-size: 0.78rem;
+      color: var(--accent-deep);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Pinterest masonry */
+    .masonry {
+      columns: 2;
+      column-gap: 12px;
+      padding: 0 18px;
+    }
+    .pin {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      border-radius: 22px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 8px 22px rgba(90, 70, 60, 0.08);
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+    .pin .img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: var(--fog);
+    }
+    .pin.tall .img { aspect-ratio: 3/4; }
+    .pin.wide .img { aspect-ratio: 5/4; }
+    .pin .cap {
+      padding: 10px 12px 12px;
+    }
+    .pin .cap strong {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .pin .cap span {
+      font-size: 0.7rem;
+      color: var(--soft);
+    }
+    .pin .heart {
+      position: absolute;
+      top: 10px; left: 10px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      backdrop-filter: blur(6px);
+    }
+    .pin { position: relative; }
+
+    /* Care list — cozy */
+    .care-card {
+      margin: 0 18px 12px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--stroke);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 6px 18px rgba(90, 70, 60, 0.05);
+    }
+    .care-thumb {
+      width: 56px; height: 56px;
+      border-radius: 18px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .care-card .meta { flex: 1; min-width: 0; }
+    .care-card .meta strong { display: block; font-size: 0.9rem; }
+    .care-card .meta span { font-size: 0.74rem; color: var(--soft); }
+    .care-btn {
+      flex-shrink: 0;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #ff9ea0, #ffe566);
+      color: #7a2f3a;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .soft-banner {
+      margin: 8px 18px 16px;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(120deg, #9af0d0, #7ec8ff);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .soft-banner strong {
+      display: block;
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .soft-banner p { font-size: 0.78rem; color: var(--soft); line-height: 1.55; }
+
+    /* Scan — gentle */
+    .scan-stage {
+      margin: 12px 18px;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 3/4;
+      background:
+        linear-gradient(180deg, rgba(250,246,241,0.1), rgba(61,53,48,0.35)),
+        url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=800&q=80") center/cover;
+      box-shadow: var(--shadow-card);
+    }
+    .scan-frame {
+      position: absolute;
+      inset: 18%;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 24px;
+      box-shadow: 0 0 0 999px rgba(61, 53, 48, 0.18);
+    }
+    .scan-hint {
+      position: absolute;
+      bottom: 18px; left: 18px; right: 18px;
+      text-align: center;
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+    }
+    .scan-actions {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      padding: 18px;
+      align-items: center;
+    }
+    .scan-orb {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(145deg, #ff9ea0, #ffe566 45%, #7de2a8);
+      box-shadow: 0 12px 28px rgba(255, 107, 122, 0.35);
+      cursor: pointer;
+    }
+    .ghost-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.75);
+      box-shadow: 0 6px 14px rgba(90,70,60,0.1);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Profile */
+    .profile-top {
+      text-align: center;
+      padding: 20px 22px 8px;
+    }
+    .profile-top .big-av {
+      width: 84px; height: 84px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      background: linear-gradient(145deg, #ff9ea0, #ffe566, #7de2a8, #7ec8ff);
+      border: 4px solid white;
+      box-shadow: var(--shadow-card);
+      display: grid;
+      place-items: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .profile-top h2 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.35rem;
+    }
+    .profile-top p { color: var(--soft); font-size: 0.82rem; margin-top: 4px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 18px;
+    }
+    .stat {
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--stroke);
+    }
+    .stat strong {
+      display: block;
+      font-family: Nunito, sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .stat span { font-size: 0.68rem; color: var(--soft); }
+
+    /* Optimized floating dock — 5 tabs, scan larger in center */
+    .tabbar {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 40;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: end;
+      gap: 0;
+      padding: 6px 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(24px) saturate(1.6);
+      box-shadow:
+        0 12px 32px rgba(53, 201, 139, 0.14),
+        0 4px 12px rgba(255, 107, 122, 0.1);
+    }
+    .tab {
+      position: relative;
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      min-height: 50px;
+      padding: 4px 1px 2px;
+      cursor: pointer;
+      color: #9a93a3;
+      font-family: inherit;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      transition: color 0.2s, transform 0.2s;
+      border-radius: 999px;
+    }
+    .tab .ico {
+      width: 32px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .tab svg { width: 19px; height: 19px; }
+    .tab.on { color: var(--accent-deep); }
+    .tab.on .ico {
+      background: linear-gradient(180deg, rgba(255, 158, 160, 0.45), rgba(201, 168, 255, 0.3));
+      transform: translateY(-1px);
+    }
+    .tab.on::after {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      position: absolute;
+      bottom: 0;
+      box-shadow: 0 0 0 3px rgba(255, 107, 122, 0.2);
+    }
+    .tab.scan-tab {
+      color: var(--joy);
+      z-index: 1;
+    }
+    .tab.scan-tab .orb {
+      width: 58px;
+      height: 58px;
+      margin-top: -30px;
+      margin-bottom: 2px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #ff6b7a 0%, #ffe566 48%, #35c98b 100%);
+      color: white;
+      box-shadow:
+        0 12px 26px rgba(255, 107, 122, 0.42),
+        0 0 0 4px rgba(255, 255, 255, 0.96);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tab.scan-tab .orb svg { width: 24px; height: 24px; stroke-width: 2.1; }
+    .tab.scan-tab { font-size: 0.56rem; }
+    .tab.scan-tab.on { color: var(--joy); }
+    .tab.scan-tab.on::after { background: var(--joy); box-shadow: 0 0 0 3px rgba(53, 201, 139, 0.25); }
+    .tab.scan-tab.on .orb {
+      transform: scale(1.08);
+      box-shadow:
+        0 14px 30px rgba(53, 201, 139, 0.42),
+        0 0 0 5px rgba(255, 255, 255, 1);
+    }
+    .tab:active { transform: scale(0.96); }
+    .tab.scan-tab:active .orb { transform: scale(1.02); }
+
+    /* Desktop preview panel */
+    .desk {
+      width: min(100%, 640px);
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      border-radius: 32px;
+      padding: 22px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-soft);
+    }
+    .desk h3 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+    .desk > p {
+      color: var(--soft);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+    .desk-chrome {
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--stroke);
+      background: var(--paper);
+      min-height: 320px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .desk-side {
+      padding: 18px 14px;
+      background:
+        linear-gradient(180deg, rgba(255,158,160,0.35), rgba(126,200,255,0.28), rgba(125,226,168,0.3));
+      border-inline-end: 1px solid var(--stroke);
+    }
+    .desk-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 0 6px;
+    }
+    .desk-brand .mark {
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #ff9ea0, #ffe566, #7de2a8);
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+    }
+    .desk-brand strong {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 0.95rem;
+    }
+    .desk-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--soft);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .desk-nav a.on {
+      background: rgba(255,255,255,0.75);
+      color: var(--accent-deep);
+      box-shadow: 0 4px 12px rgba(90,70,60,0.06);
+    }
+    .desk-main { padding: 18px; }
+    .desk-main .title {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.35rem;
+      margin-bottom: 14px;
+    }
+    .desk-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 12px;
+    }
+    .desk-card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid var(--stroke);
+      min-height: 140px;
+    }
+    .desk-card.photo {
+      background:
+        linear-gradient(180deg, transparent 40%, rgba(61,53,48,0.55)),
+        url("https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&q=80") center/cover;
+      color: white;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 200px;
+    }
+    .desk-card.photo h4 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 1.05rem;
+    }
+    .desk-card.soft {
+      padding: 14px;
+      background: linear-gradient(145deg, #ffe566, #9af0d0);
+    }
+    .desk-card.soft h4 {
+      font-family: "Fraunces", "Vazirmatn", serif;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+    .desk-card.soft p { font-size: 0.75rem; color: var(--soft); line-height: 1.55; }
+
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      appearance: none;
+      border: none;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 12px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff9ea0, #ffe566 50%, #7de2a8);
+      color: #3a2a30;
+      box-shadow: 0 10px 24px rgba(255, 107, 122, 0.3);
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,0.7);
+      color: var(--ink);
+      border: 1px solid var(--stroke);
+    }
+    .btn:hover { transform: translateY(-1px); }
+
+    .palette-board {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .palette-board div {
+      border-radius: 14px;
+      padding: 12px 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--ink);
+      min-height: 58px;
+      display: flex;
+      align-items: flex-end;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .view.on { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="banner">
+      <div>
+        <div class="pill">فقط دمو — هنوز روی اپ اعمال نشده</div>
+        <h1>گیاه‌یار · شاد، پینترستی، خودمونی</h1>
+        <p>
+          رنگ‌های زنده‌تر، داک کپسولی جمع‌وجور با نشان فعال واضح،
+          و دکمهٔ اسکن رنگین‌کمانی در مرکز — هنوز فقط دمو.
+        </p>
+        <div class="swatches" aria-hidden="true">
+          <span class="swatch" style="background:#ff9ea0"></span>
+          <span class="swatch" style="background:#ffb980"></span>
+          <span class="swatch" style="background:#ffe566"></span>
+          <span class="swatch" style="background:#7de2a8"></span>
+          <span class="swatch" style="background:#c9a8ff"></span>
+          <span class="swatch" style="background:#7ec8ff"></span>
+        </div>
+      </div>
+      <aside class="note">
+        <strong>چی را قضاوت کنی؟</strong>
+        رنگ‌ها، نرمی کارت‌ها، داک پایین، و حس دسکتاپ.
+        اگر پسندیدی می‌گوییم «اعمال کن» تا روی اپ واقعی پیاده شود.
+      </aside>
+    </header>
+
+    <div class="stage">
+      <!-- MOBILE -->
+      <div class="phone-col">
+        <div class="phone" aria-label="پیش‌نمایش موبایل">
+          <div class="screen">
+            <div class="status">
+              <span>۹:۴۱</span>
+              <span class="icons" aria-hidden="true">
+                <svg width="15" height="11" viewBox="0 0 15 11"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="currentColor"/><rect x="4" y="4" width="3" height="7" rx="0.5" fill="currentColor"/><rect x="8" y="1" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="12" y="0" width="3" height="11" rx="0.5" fill="currentColor" opacity=".35"/></svg>
+                <svg width="15" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5a8 8 0 0 1 14 0"/><path d="M8.5 15a4.5 4.5 0 0 1 7 0"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></svg>
+                <svg width="22" height="11" viewBox="0 0 28 14"><rect x="1" y="1" width="22" height="12" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="3" y="3.2" width="15" height="7.6" rx="1.5" fill="currentColor"/><rect x="24" y="4.5" width="2.5" height="5" rx="1" fill="currentColor" opacity=".5"/></svg>
+              </span>
+            </div>
+
+            <div class="app">
+              <!-- HOME -->
+              <section class="view on" data-view="home">
+                <div class="scroll">
+                  <div class="greeting">
+                    <div>
+                      <div class="hi">صبح بخیر، مونا 🌿</div>
+                      <h2>گیاهاتت<br/>امروز آرومن</h2>
+                    </div>
+                    <div class="avatar">م</div>
+                  </div>
+
+                  <div class="search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                    <span>جستجوی گیاه، مراقبت، ایده…</span>
+                  </div>
+
+                  <div class="mood-row">
+                    <button class="mood on" type="button">برای تو</button>
+                    <button class="mood" type="button">آبیاری</button>
+                    <button class="mood" type="button">فضای خانه</button>
+                    <button class="mood" type="button">گلدان‌های من</button>
+                  </div>
+
+                  <article class="story">
+                    <span class="tag">ایدهٔ امروز</span>
+                    <h3>یک گوشهٔ نرم برای پوتوس</h3>
+                    <p>نور غیرمستقیم + آبیاری وقتی خاک نیمه‌خشک شد</p>
+                  </article>
+
+                  <div class="section-head">
+                    <h3>تختهٔ الهام</h3>
+                    <a href="#">همه</a>
+                  </div>
+
+                  <div class="masonry">
+                    <article class="pin tall">
+                      <span class="heart">♡</span>
+                      <img class="img" alt="" src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500&q=80" />
+                      <div class="cap"><strong>مونسترا</strong><span>نور ملایم · سالم</span></div>
+                    </article>
+                    <article class="pin">
+                      <span class="heart">♡</span>
+                      <img class="img" alt="" src="https://images.unsplash.com/photo-1459411552884-841db9b3cb2a?w=500&q=80" />
+                      <div class="cap"><strong>کاکتوس میز</strong><span>هر ۲ هفته</span></div>
+                    </article>
+                    <article class="pin wide">
+                      <span class="heart">♡</span>
+                      <img class="img" alt="" src="https://images.unsplash.com/photo-1463936574219-8d13cdcec0b5?w=500&q=80" />
+                      <div class="cap"><strong>گلدان سفالی</strong><span>چیدمان خانه</span></div>
+                    </article>
+                    <article class="pin">
+                      <span class="heart">♡</span>
+                      <img class="img" alt="" src="https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=500&q=80" />
+                      <div class="cap"><strong>فیکوس</strong><span>نیاز به توجه</span></div>
+                    </article>
+                  </div>
+                </div>
+              </section>
+
+              <!-- CARE -->
+              <section class="view" data-view="care">
+                <div class="scroll">
+                  <div class="greeting">
+                    <div>
+                      <div class="hi">مراقبت نرم</div>
+                      <h2>امروز فقط<br/>دو تا کار کوچیک</h2>
+                    </div>
+                    <div class="avatar">م</div>
+                  </div>
+
+                  <div class="soft-banner">
+                    <strong>هوای امروز ملایم است</strong>
+                    <p>آبیاری را کمی عقب بینداز؛ خاک هنوز رطوبت دارد.</p>
+                  </div>
+
+                  <div class="care-card">
+                    <img class="care-thumb" alt="" src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=200&q=80" />
+                    <div class="meta">
+                      <strong>مونسترا گوشه</strong>
+                      <span>آبیاری · تا عصر</span>
+                    </div>
+                    <button class="care-btn" type="button">انجام شد</button>
+                  </div>
+                  <div class="care-card">
+                    <img class="care-thumb" alt="" src="https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=200&q=80" />
+                    <div class="meta">
+                      <strong>فیکوس لیراتا</strong>
+                      <span>برگ‌ها را غبارپاشی کن</span>
+                    </div>
+                    <button class="care-btn" type="button">انجام شد</button>
+                  </div>
+                  <div class="care-card">
+                    <img class="care-thumb" alt="" src="https://images.unsplash.com/photo-1459411552884-841db9b3cb2a?w=200&q=80" />
+                    <div class="meta">
+                      <strong>کاکتوس میز کار</strong>
+                      <span>فردا · کود سبک</span>
+                    </div>
+                    <button class="care-btn" type="button">بعداً</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- SCAN -->
+              <section class="view" data-view="scan">
+                <div class="scroll">
+                  <div class="greeting">
+                    <div>
+                      <div class="hi">اسکن آرام</div>
+                      <h2>برگ را<br/>وسط قاب بگذار</h2>
+                    </div>
+                  </div>
+                  <div class="scan-stage">
+                    <div class="scan-frame"></div>
+                    <div class="scan-hint">نور طبیعی بهترین نتیجه را می‌دهد</div>
+                  </div>
+                  <div class="scan-actions">
+                    <button class="ghost-btn" type="button" aria-label="گالری">🖼</button>
+                    <button class="scan-orb" type="button" aria-label="عکس بگیر"></button>
+                    <button class="ghost-btn" type="button" aria-label="فلش">✦</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- CALENDAR -->
+              <section class="view" data-view="calendar">
+                <div class="scroll">
+                  <div class="greeting">
+                    <div>
+                      <div class="hi">تقویم مراقبت</div>
+                      <h2>هفتهٔ نرم<br/>گیاهانت</h2>
+                    </div>
+                    <div class="avatar">م</div>
+                  </div>
+
+                  <div class="soft-banner" style="background:linear-gradient(120deg,#ffe566,#7ec8ff)">
+                    <strong>امروز · یکشنبه</strong>
+                    <p>۲ یادآور آب و یک غبارپاشی سبک داری.</p>
+                  </div>
+
+                  <div class="care-card">
+                    <div class="care-thumb" style="display:grid;place-items:center;background:linear-gradient(145deg,#ff9ea0,#ffe566);font-size:1.4rem">۱۲</div>
+                    <div class="meta">
+                      <strong>آبیاری مونسترا</strong>
+                      <span>صبح · امروز</span>
+                    </div>
+                    <button class="care-btn" type="button">انجام شد</button>
+                  </div>
+                  <div class="care-card">
+                    <div class="care-thumb" style="display:grid;place-items:center;background:linear-gradient(145deg,#7de2a8,#7ec8ff);font-size:1.4rem">۱۳</div>
+                    <div class="meta">
+                      <strong>کود سبک فیکوس</strong>
+                      <span>فردا</span>
+                    </div>
+                    <button class="care-btn" type="button">یادآوری</button>
+                  </div>
+                  <div class="care-card">
+                    <div class="care-thumb" style="display:grid;place-items:center;background:linear-gradient(145deg,#c9a8ff,#ff9ea0);font-size:1.4rem">۱۵</div>
+                    <div class="meta">
+                      <strong>تعویض گلدان کاکتوس</strong>
+                      <span>چهارشنبه</span>
+                    </div>
+                    <button class="care-btn" type="button">جزئیات</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- PROFILE -->
+              <section class="view" data-view="profile">
+                <div class="scroll">
+                  <div class="profile-top">
+                    <div class="big-av">م</div>
+                    <h2>مونا · باغبان خونگی</h2>
+                    <p>۱۲ گیاه · تهران · عاشق نور صبح</p>
+                  </div>
+                  <div class="stats">
+                    <div class="stat"><strong>۱۲</strong><span>گیاه</span></div>
+                    <div class="stat"><strong>۴۸</strong><span>اسکن</span></div>
+                    <div class="stat"><strong>۹۲٪</strong><span>مراقبت</span></div>
+                  </div>
+                  <div class="soft-banner" style="background:linear-gradient(120deg,#ff9ea0,#c9a8ff,#7ec8ff)">
+                    <strong>فضای شخصی تو</strong>
+                    <p>یادداشت‌ها، عکس‌ها و حال گیاهانت اینجا جمع می‌شوند — مثل یک آلبوم خونگی.</p>
+                  </div>
+                </div>
+              </section>
+
+              <nav class="tabbar" aria-label="منوی اصلی">
+                <button class="tab on" data-go="home" type="button">
+                  <span class="ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>
+                  </span>
+                  خانه
+                </button>
+                <button class="tab" data-go="care" type="button">
+                  <span class="ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>
+                  </span>
+                  مراقبت
+                </button>
+                <button class="tab scan-tab" data-go="scan" type="button">
+                  <span class="orb" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>
+                  </span>
+                  اسکن
+                </button>
+                <button class="tab" data-go="calendar" type="button">
+                  <span class="ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3.5v3M16 3.5v3M3.5 10h17"/></svg>
+                  </span>
+                  تقویم
+                </button>
+                <button class="tab" data-go="profile" type="button">
+                  <span class="ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="3.5"/><path d="M5 19a7 7 0 0 1 14 0"/></svg>
+                  </span>
+                  من
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESKTOP -->
+      <div class="desk">
+        <h3>نسخه دسکتاپ · همان حس، فضای بازتر</h3>
+        <p>
+          سایدبار نرم پاستلی، کارت‌های عکس‌محور، بدون داشبورد سنگین —
+          مثل یک برد پینترست برای گیاهان خانه.
+        </p>
+
+        <div class="desk-chrome" aria-hidden="true">
+          <aside class="desk-side">
+            <div class="desk-brand">
+              <div class="mark">🌿</div>
+              <strong>گیاه‌یار</strong>
+            </div>
+            <nav class="desk-nav">
+              <a class="on" href="#">خانه</a>
+              <a href="#">مراقبت</a>
+              <a href="#">اسکن</a>
+              <a href="#">تقویم</a>
+              <a href="#">من</a>
+            </nav>
+          </aside>
+          <main class="desk-main">
+            <div class="title">صبح بخیر · گوشهٔ سبزت</div>
+            <div class="desk-grid">
+              <div class="desk-card photo">
+                <h4>پوتوس آویز</h4>
+                <p style="font-size:0.75rem;opacity:.9;margin-top:4px">آبیاری تا ۲ روز دیگه</p>
+              </div>
+              <div class="desk-card soft">
+                <h4>یادداشت نرم</h4>
+                <p>امروز نور پنجره غربی خوب است. برگ‌های زرد را جدا کن و کمی غبار بزن.</p>
+              </div>
+            </div>
+          </main>
+        </div>
+
+        <div class="palette-board" aria-label="پالت رنگ">
+          <div style="background:#ff9ea0">Coral</div>
+          <div style="background:#ffb980">Peach</div>
+          <div style="background:#ffe566">Sunny</div>
+          <div style="background:#7de2a8">Mint</div>
+          <div style="background:#c9a8ff">Lilac</div>
+          <div style="background:#7ec8ff">Sky</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="button" id="approve">این جهت را دوست دارم — اعمال کن</button>
+          <button class="btn btn-ghost" type="button" id="tweak">تغییر جزئی می‌خوام</button>
+        </div>
+        <p id="feedback" style="margin-top:12px;font-size:0.82rem;color:var(--soft);min-height:1.4em"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const views = document.querySelectorAll(".view");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const id = tab.dataset.go;
+        tabs.forEach((t) => t.classList.toggle("on", t === tab));
+        views.forEach((v) => v.classList.toggle("on", v.dataset.view === id));
+      });
+    });
+
+    document.querySelectorAll(".mood").forEach((m) => {
+      m.addEventListener("click", () => {
+        document.querySelectorAll(".mood").forEach((x) => x.classList.remove("on"));
+        m.classList.add("on");
+      });
+    });
+
+    const feedback = document.getElementById("feedback");
+    document.getElementById("approve").addEventListener("click", () => {
+      feedback.textContent = "عالی — در چت بگو «اعمال کن» تا همین جهت روی اپ واقعی پیاده شود.";
+    });
+    document.getElementById("tweak").addEventListener("click", () => {
+      feedback.textContent = "بگو چی عوض شود: رنگ‌ها گرم‌تر؟ داک ساده‌تر؟ کارت‌ها گردتر؟ فونت نرم‌تر؟";
+    });
+  </script>
+</body>
+</html>

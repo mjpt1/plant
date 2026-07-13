@@ -33,6 +33,19 @@ export const analysisMetaSchema = z.object({
       })
     )
     .default([]),
+  speciesCandidates: z
+    .array(
+      z.object({
+        scientificName: z.string(),
+        commonName: z.string().optional().default(""),
+        family: z.string().optional().default(""),
+        confidence: z.number().min(0).max(100),
+      })
+    )
+    .optional()
+    .default([]),
+  visionConfigured: z.boolean().optional().default(false),
+  toxicityWarning: z.string().optional().default(""),
 });
 
 export const plantAnalysisSchema = z.object({

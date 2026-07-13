@@ -14,6 +14,7 @@ import {
   Shield,
   BadgeCheck,
   Leaf,
+  Sun,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -25,6 +26,8 @@ const sidebarItems = [
   { href: "/plants", icon: Sprout, key: "myPlants" as const },
   { href: "/catalog", icon: BookOpen, key: "catalog" as const },
   { href: "/calendar", icon: Calendar, key: "calendar" as const },
+  { href: "/light-meter", icon: Sun, key: "lightMeter" as const },
+  { href: "/consultations", icon: MessageCircleQuestion, key: "consultations" as const },
 ];
 
 const communityItems = [

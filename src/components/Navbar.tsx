@@ -38,7 +38,10 @@ type NavKey =
   | "dashboard"
   | "social"
   | "qa"
-  | "care";
+  | "care"
+  | "lightMeter"
+  | "consultations"
+  | "premium";
 
 type DockItem = {
   href: string;
@@ -429,6 +432,9 @@ export default function Navbar() {
                   {(
                     [
                       { href: "/catalog", icon: BookOpen, key: "catalog" as const },
+                      { href: "/light-meter", icon: Sun, key: "lightMeter" as const },
+                      { href: "/consultations", icon: MessageCircleQuestion, key: "consultations" as const },
+                      { href: "/premium", icon: BadgeCheck, key: "premium" as const },
                       ...(user
                         ? [{ href: "/plants", icon: Sprout, key: "myPlants" as const }]
                         : [{ href: "/", icon: Leaf, key: "home" as const }]),

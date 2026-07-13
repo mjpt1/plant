@@ -1,10 +1,14 @@
-export type PlantNetIdentification = {
+export type PlantNetCandidate = {
   scientificName: string;
   scientificNameWithAuthor: string;
   family: string | null;
   commonNameEn: string | null;
   score: number;
+};
+
+export type PlantNetIdentification = PlantNetCandidate & {
   rejected: boolean;
+  candidates: PlantNetCandidate[];
 };
 
 function mapScanTypeToOrgan(imageType?: string): string {
@@ -26,6 +30,33 @@ function mapScanTypeToOrgan(imageType?: string): string {
 
 export function getPlantNetApiKey(): string | undefined {
   return process.env.PLANTNET_API_KEY || process.env.ANALYSIS_PLANTNET_KEY;
+}
+
+function mapResult(item: {
+  score?: number;
+  species?: {
+    scientificNameWithoutAuthor?: string;
+    scientificName?: string;
+    family?: { scientificName?: string };
+    commonNames?: string[];
+  };
+}): PlantNetCandidate | null {
+  const scientificNameWithAuthor =
+    item.species?.scientificName ||
+    item.species?.scientificNameWithoutAuthor ||
+    "";
+  const scientificName =
+    item.species?.scientificNameWithoutAuthor ||
+    scientificNameWithAuthor.split(" ").slice(0, 2).join(" ");
+  const score = item.score ?? 0;
+  if (!scientificName) return null;
+  return {
+    scientificName,
+    scientificNameWithAuthor,
+    family: item.species?.family?.scientificName || null,
+    commonNameEn: item.species?.commonNames?.[0] || null,
+    score,
+  };
 }
 
 export async function identifyWithPlantNet(
@@ -71,34 +102,39 @@ export async function identifyWithPlantNet(
     }>;
   };
 
-  const top = data.results?.[0];
-  const scientificNameWithAuthor =
-    data.bestMatch ||
-    top?.species?.scientificName ||
-    top?.species?.scientificNameWithoutAuthor ||
-    "";
-  const scientificName =
-    top?.species?.scientificNameWithoutAuthor ||
-    scientificNameWithAuthor.split(" ").slice(0, 2).join(" ");
+  const candidates = (data.results || [])
+    .map(mapResult)
+    .filter((c): c is PlantNetCandidate => Boolean(c))
+    .slice(0, 5);
+
+  const top = candidates[0];
   const score = top?.score ?? 0;
+  const scientificNameWithAuthor =
+    data.bestMatch || top?.scientificNameWithAuthor || "";
+  const scientificName =
+    top?.scientificName ||
+    scientificNameWithAuthor.split(" ").slice(0, 2).join(" ");
 
   if (!scientificName || score < 0.05) {
     return {
       scientificName: "",
       scientificNameWithAuthor: scientificNameWithAuthor || "",
-      family: top?.species?.family?.scientificName || null,
-      commonNameEn: top?.species?.commonNames?.[0] || null,
+      family: top?.family || null,
+      commonNameEn: top?.commonNameEn || null,
       score,
       rejected: true,
+      candidates,
     };
   }
 
   return {
     scientificName,
-    scientificNameWithAuthor,
-    family: top?.species?.family?.scientificName || null,
-    commonNameEn: top?.species?.commonNames?.[0] || null,
+    scientificNameWithAuthor:
+      top?.scientificNameWithAuthor || scientificNameWithAuthor,
+    family: top?.family || null,
+    commonNameEn: top?.commonNameEn || null,
     score,
     rejected: false,
+    candidates,
   };
 }

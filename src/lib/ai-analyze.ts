@@ -27,7 +27,11 @@ import type { Locale } from "@/i18n";
 
 function withMeta(
   analysis: PlantAnalysis,
-  meta: NonNullable<PlantAnalysis["meta"]>
+  meta: Partial<NonNullable<PlantAnalysis["meta"]>> &
+    Pick<
+      NonNullable<PlantAnalysis["meta"]>,
+      "speciesSource" | "healthSource" | "diseaseModelUsed" | "diseaseModelLabels"
+    >
 ): PlantAnalysis {
   const diseaseDiagnosis = sanitizeDiseaseLabels(analysis.health.diseaseDiagnosis);
   const health = {
@@ -45,6 +49,14 @@ function withMeta(
       healthSource: meta.healthSource ?? "none",
       diseaseModelUsed: meta.diseaseModelUsed ?? false,
       diseaseModelLabels: meta.diseaseModelLabels ?? [],
+      speciesCandidates:
+        meta.speciesCandidates ?? analysis.meta?.speciesCandidates ?? [],
+      visionConfigured:
+        meta.visionConfigured ??
+        analysis.meta?.visionConfigured ??
+        hasLlmAnalysisConfigured(),
+      toxicityWarning:
+        meta.toxicityWarning ?? analysis.meta?.toxicityWarning ?? "",
     },
     health,
   };
@@ -250,6 +262,13 @@ function buildAnalysisFromCatalog(
     family: string | null;
     commonNameEn: string | null;
     score: number;
+    candidates?: Array<{
+      scientificName: string;
+      scientificNameWithAuthor: string;
+      family: string | null;
+      commonNameEn: string | null;
+      score: number;
+    }>;
   },
   locale?: string,
   imageType?: string
@@ -308,6 +327,24 @@ function buildAnalysisFromCatalog(
   const fertilizer =
     localizePlantText(catalog?.fertilizerGuide, lang) ||
     (fa ? "طبق فصل رشد" : "During growing season");
+
+  const toxicityRaw = catalog?.toxicity?.trim() || "";
+  const toxicityLocalized =
+    localizePlantText(toxicityRaw, lang) || toxicityRaw;
+  const looksToxic =
+    /toxic|سمی|poison|خطر|pet|گربه|سگ|child|کودک/i.test(toxicityRaw);
+  const toxicityWarning = looksToxic
+    ? fa
+      ? `هشدار سمیت: ${toxicityLocalized}`
+      : `Toxicity warning: ${toxicityLocalized}`
+    : "";
+
+  const speciesCandidates = (identification.candidates || []).map((c) => ({
+    scientificName: c.scientificNameWithAuthor || c.scientificName,
+    commonName: c.commonNameEn || "",
+    family: c.family || "",
+    confidence: Math.round(Math.min(c.score, 1) * 100),
+  }));
 
   return withMeta(
     {
@@ -376,10 +413,10 @@ function buildAnalysisFromCatalog(
             ? "برای تشخیص بیماری، عکس نزدیک از ناحیهٔ آسیب‌دیده بگیرید."
             : "For disease checks, take a close-up of affected tissue.",
         ],
-        prevention: catalog?.toxicity
-          ? [localizePlantText(catalog.toxicity, lang) || catalog.toxicity]
+        prevention: toxicityLocalized
+          ? [toxicityLocalized]
           : [fa ? "از آب‌دهی بیش از حد پرهیز کنید." : "Avoid overwatering."],
-        warnings: [],
+        warnings: toxicityWarning ? [toxicityWarning] : [],
       },
     },
     {
@@ -387,6 +424,9 @@ function buildAnalysisFromCatalog(
       healthSource: "none",
       diseaseModelUsed: false,
       diseaseModelLabels: [],
+      speciesCandidates,
+      visionConfigured: hasLlmAnalysisConfigured(),
+      toxicityWarning,
     }
   );
 }

@@ -62,6 +62,10 @@ model User {
   catalogAdded        PlantCatalog[] @relation("CatalogContributor")
   diagnosisFeedback   DiagnosisFeedback[]
   careOutcomes        CareOutcome[]
+  journalEntries      PlantJournalEntry[]
+  careSharesCreated   CareShareLink[]
+  consultations       ExpertConsultation[] @relation("ConsultationUser")
+  consultationsHandled ExpertConsultation[] @relation("ConsultationExpert")
 }
 
 model Account {
@@ -122,6 +126,8 @@ model Plant {
   scanHistory       ScanHistory[]
   careReminders     CareReminder[]
   careOutcomes      CareOutcome[]
+  journalEntries    PlantJournalEntry[]
+  careShares        CareShareLink[]
 
   @@index([userId])
 }
@@ -372,4 +378,58 @@ model Report {
 
   @@index([status])
   @@index([targetType, targetId])
+}
+
+model PlantJournalEntry {
+  id        String   @id @default(cuid())
+  plantId   String
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageUrl  String?
+  note      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([plantId, createdAt])
+  @@index([userId])
+}
+
+model CareShareLink {
+  id        String   @id @default(cuid())
+  token     String   @unique @default(cuid())
+  plantId   String
+  plant     Plant    @relation(fields: [plantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([plantId])
+  @@index([userId])
+}
+
+enum ConsultationStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+model ExpertConsultation {
+  id           String             @id @default(cuid())
+  userId       String
+  user         User               @relation("ConsultationUser", fields: [userId], references: [id], onDelete: Cascade)
+  expertId     String?
+  expert       User?              @relation("ConsultationExpert", fields: [expertId], references: [id], onDelete: SetNull)
+  plantId      String?
+  imageUrl     String?
+  subject      String
+  message      String             @db.Text
+  reply        String?            @db.Text
+  status       ConsultationStatus @default(OPEN)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([expertId])
 }

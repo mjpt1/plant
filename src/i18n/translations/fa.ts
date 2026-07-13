@@ -23,6 +23,9 @@ export const fa: TranslationKeys = {
     care: "مراقبت",
     community: "جامعه",
     me: "من",
+    lightMeter: "لایت‌متر",
+    consultations: "مشاوره کارشناس",
+    premium: "پلاس",
   },
   theme: {
     light: "روشن",

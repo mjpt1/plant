@@ -1,34 +1,55 @@
 {
   "name": "گیاه‌یار",
   "short_name": "گیاه‌یار",
-  "description": "شناسایی گیاه، تشخیص بیماری و مدیریت مراقبت",
-  "start_url": "/",
+  "description": "شناسایی گیاه، تشخیص بیماری، لایت‌متر و مدیریت مراقبت",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f8faf8",
-  "theme_color": "#10b981",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#fff8f2",
+  "theme_color": "#ff9ea0",
   "orientation": "portrait-primary",
   "lang": "fa",
-  "categories": ["lifestyle", "utilities"],
+  "dir": "rtl",
+  "categories": ["lifestyle", "utilities", "education"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Scan Plant",
-      "short_name": "Scan",
+      "name": "اسکن گیاه",
+      "short_name": "اسکن",
       "url": "/scan",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
     },
     {
-      "name": "My Plants",
-      "short_name": "Plants",
+      "name": "لایت‌متر",
+      "short_name": "نور",
+      "url": "/light-meter",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "گیاهان من",
+      "short_name": "گیاهان",
       "url": "/plants",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "تقویم",
+      "short_name": "تقویم",
+      "url": "/calendar",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
     }
   ]

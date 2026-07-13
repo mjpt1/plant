@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import {
+  cacheGetJson,
+  cacheSetJson,
+  catalogSearchKey,
+} from "@/lib/redis";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +17,26 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = Math.min(parseInt(searchParams.get("limit") || "24", 10), 100);
     const skip = (page - 1) * limit;
+
+    const cacheKey = catalogSearchKey({
+      q: q.toLowerCase().trim(),
+      category,
+      indoor: indoor || "",
+      page,
+      limit,
+    });
+    const cached = await cacheGetJson<{
+      plants: unknown[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+      categories: unknown[];
+      cached: boolean;
+    }>(cacheKey);
+    if (cached) {
+      return NextResponse.json({ ...cached, cached: true });
+    }
 
     const andFilters: Prisma.PlantCatalogWhereInput[] = [
       { OR: [{ isUserSubmitted: false }, { isApproved: true }] },
@@ -55,6 +80,7 @@ export async function GET(request: NextRequest) {
           isIndoor: true,
           imageUrl: true,
           source: true,
+          toxicity: true,
         },
       }),
       prisma.plantCatalog.count({ where }),
@@ -65,7 +91,7 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    return NextResponse.json({
+    const payload = {
       plants,
       total,
       page,
@@ -76,7 +102,11 @@ export async function GET(request: NextRequest) {
         categoryFa: c.categoryFa,
         count: c._count.category,
       })),
-    });
+      cached: false,
+    };
+
+    await cacheSetJson(cacheKey, payload, 600);
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("GET catalog error:", error);
     return NextResponse.json({ error: "Failed to fetch catalog" }, { status: 500 });

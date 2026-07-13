@@ -21,6 +21,9 @@ export const en = {
     care: "Care",
     community: "Community",
     me: "Me",
+    lightMeter: "Light meter",
+    consultations: "Expert help",
+    premium: "Plus",
   },
   theme: {
     light: "Light",

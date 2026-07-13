@@ -800,6 +800,39 @@ export default function ScanPage() {
                   {t.scan.results.confidence}: {formatPercent(displayResult.plant.confidence)}
                 </p>
               </CardHeader>
+              {displayResult.meta?.toxicityWarning && (
+                <div className="mx-6 mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
+                  {displayResult.meta.toxicityWarning}
+                </div>
+              )}
+              {displayResult.meta?.speciesCandidates &&
+                displayResult.meta.speciesCandidates.length > 1 && (
+                  <div className="mx-6 mb-4 space-y-2">
+                    <h4 className="text-sm font-medium">
+                      {locale === "fa" ? "کاندیداهای دیگر" : "Other candidates"}
+                    </h4>
+                    <ul className="space-y-1.5">
+                      {displayResult.meta.speciesCandidates.map((c, i) => (
+                        <li
+                          key={`${c.scientificName}-${i}`}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-border/50 px-3 py-2 text-sm"
+                        >
+                          <span className="min-w-0">
+                            <span className="font-medium block truncate">
+                              {c.commonName || c.scientificName}
+                            </span>
+                            <span className="text-xs text-muted-foreground italic truncate block">
+                              {c.scientificName}
+                            </span>
+                          </span>
+                          <Badge variant="outline" className="shrink-0">
+                            {formatPercent(c.confidence)}
+                          </Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               {(displayResult.plant.description || displayResult.plant.uses) && (
                 <CardContent className="space-y-4 pt-0">
                   {displayResult.plant.description && (
@@ -854,6 +887,13 @@ export default function ScanPage() {
                         displayResult.meta.healthSource as keyof typeof t.scan.results.sources
                       ] || displayResult.meta.healthSource}
                     </span>
+                  </div>
+                )}
+                {displayResult.meta?.visionConfigured === false && (
+                  <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm">
+                    {locale === "fa"
+                      ? "تشخیص بیماری واقعی نیاز به کلید Gemini/OpenAI روی سرور دارد. فعلاً فقط فرضیه‌های مراقبتی نمایش داده می‌شود."
+                      : "Real disease diagnosis needs a Gemini/OpenAI key on the server. Showing care hypotheses only."}
                   </div>
                 )}
                 {displayResult.health.soilAnalysis && (
