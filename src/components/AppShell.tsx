@@ -44,11 +44,11 @@ export function AppSidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-[17.5rem] shrink-0 h-[calc(100vh-4.5rem)] sticky top-[4.5rem]">
-      <div className="m-3 flex flex-1 flex-col overflow-hidden rounded-3xl border border-border/50 glass shadow-xl shadow-emerald-900/5">
-        <div className="p-4 border-b border-border/40">
+      <div className="m-3 flex flex-1 flex-col overflow-hidden rounded-3xl border border-border/50 glass shadow-xl shadow-rose-500/5">
+        <div className="p-4 border-b border-border/40 bg-gradient-to-l from-rose-300/20 via-amber-200/15 to-emerald-300/15">
           <Link href="/dashboard" className="flex items-center gap-3 group">
             <div className="brand-mark group-hover:scale-105 transition-transform">
-              <Leaf className="w-5 h-5 text-white" />
+              <Leaf className="w-5 h-5 text-white drop-shadow-sm" />
             </div>
             <div className="min-w-0">
               <p className="font-bold text-sm truncate">{t.app.name}</p>

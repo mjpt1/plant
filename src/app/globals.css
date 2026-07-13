@@ -4,64 +4,67 @@
 
 @layer base {
   :root {
-    --background: 148 28% 97%;
-    --foreground: 155 32% 12%;
+    --background: 30 100% 98%;
+    --foreground: 270 12% 18%;
     --card: 0 0% 100%;
-    --card-foreground: 155 32% 12%;
+    --card-foreground: 270 12% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 155 32% 12%;
-    --primary: 158 64% 32%;
+    --popover-foreground: 270 12% 18%;
+    --primary: 350 100% 68%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 148 22% 93%;
-    --secondary-foreground: 155 28% 18%;
-    --muted: 148 16% 93%;
-    --muted-foreground: 150 10% 42%;
-    --accent: 158 35% 92%;
-    --accent-foreground: 158 55% 24%;
+    --secondary: 40 100% 94%;
+    --secondary-foreground: 270 12% 22%;
+    --muted: 30 40% 95%;
+    --muted-foreground: 270 8% 48%;
+    --accent: 150 70% 92%;
+    --accent-foreground: 160 45% 28%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 148 18% 86%;
-    --input: 148 18% 86%;
-    --ring: 158 64% 32%;
-    --radius: 1rem;
+    --border: 30 25% 90%;
+    --input: 30 25% 90%;
+    --ring: 350 100% 68%;
+    --radius: 1.1rem;
     --card-glass: rgba(255, 255, 255, 0.78);
-    --card-border: rgba(255, 255, 255, 0.45);
-    --emerald-glow: rgba(16, 185, 129, 0.18);
-    --nav-glass: rgba(250, 253, 251, 0.82);
+    --card-border: rgba(255, 255, 255, 0.55);
+    --emerald-glow: rgba(53, 201, 139, 0.16);
+    --nav-glass: rgba(255, 248, 242, 0.86);
     --dock-glass: rgba(255, 255, 255, 0.88);
-    --leaf-mist: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(52, 211, 153, 0.18), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 95% 5%, rgba(110, 231, 183, 0.12), transparent 50%),
-      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(16, 185, 129, 0.08), transparent 60%);
+    --leaf-mist:
+      radial-gradient(ellipse 80% 50% at 8% -8%, rgba(255, 158, 160, 0.35), transparent 55%),
+      radial-gradient(ellipse 60% 42% at 95% 5%, rgba(126, 200, 255, 0.32), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 70% 100%, rgba(125, 226, 168, 0.28), transparent 55%),
+      radial-gradient(ellipse 45% 30% at 35% 85%, rgba(255, 229, 102, 0.22), transparent 50%);
   }
 
   .dark {
-    --background: 155 28% 6%;
-    --foreground: 148 18% 94%;
-    --card: 155 22% 9%;
-    --card-foreground: 148 18% 94%;
-    --popover: 155 22% 9%;
-    --popover-foreground: 148 18% 94%;
-    --primary: 158 58% 42%;
+    --background: 270 16% 8%;
+    --foreground: 30 30% 96%;
+    --card: 270 14% 11%;
+    --card-foreground: 30 30% 96%;
+    --popover: 270 14% 11%;
+    --popover-foreground: 30 30% 96%;
+    --primary: 350 85% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 155 16% 14%;
-    --secondary-foreground: 148 16% 92%;
-    --muted: 155 14% 14%;
-    --muted-foreground: 148 10% 62%;
-    --accent: 158 24% 15%;
-    --accent-foreground: 158 50% 72%;
+    --secondary: 270 12% 16%;
+    --secondary-foreground: 30 20% 92%;
+    --muted: 270 10% 15%;
+    --muted-foreground: 270 8% 65%;
+    --accent: 160 30% 16%;
+    --accent-foreground: 150 55% 72%;
     --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 155 14% 16%;
-    --input: 155 14% 16%;
-    --ring: 158 58% 42%;
-    --card-glass: rgba(12, 22, 16, 0.78);
-    --card-border: rgba(255, 255, 255, 0.07);
-    --emerald-glow: rgba(16, 185, 129, 0.12);
-    --nav-glass: rgba(10, 18, 14, 0.86);
-    --dock-glass: rgba(14, 24, 18, 0.92);
-    --leaf-mist: radial-gradient(ellipse 80% 50% at 10% -10%, rgba(16, 185, 129, 0.14), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 95% 5%, rgba(52, 211, 153, 0.08), transparent 50%),
-      radial-gradient(ellipse 50% 35% at 50% 100%, rgba(6, 95, 70, 0.2), transparent 60%);
+    --border: 270 10% 18%;
+    --input: 270 10% 18%;
+    --ring: 350 85% 65%;
+    --card-glass: rgba(28, 24, 36, 0.82);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --emerald-glow: rgba(53, 201, 139, 0.12);
+    --nav-glass: rgba(22, 18, 28, 0.9);
+    --dock-glass: rgba(28, 24, 36, 0.94);
+    --leaf-mist:
+      radial-gradient(ellipse 80% 50% at 8% -8%, rgba(255, 107, 122, 0.16), transparent 55%),
+      radial-gradient(ellipse 60% 42% at 95% 5%, rgba(126, 200, 255, 0.12), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 70% 100%, rgba(53, 201, 139, 0.12), transparent 55%);
   }
 
   * {
@@ -81,11 +84,11 @@
   }
 
   html[dir="ltr"] body {
-    font-family: "Figtree", system-ui, sans-serif;
+    font-family: "Nunito", "Figtree", system-ui, sans-serif;
   }
 
   ::selection {
-    background: hsl(158 64% 32% / 0.22);
+    background: hsl(350 100% 68% / 0.22);
   }
 }
 
@@ -95,7 +98,7 @@
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-lg shadow-emerald-500/5;
+    @apply glass rounded-2xl shadow-lg shadow-rose-500/5;
   }
 
   .nav-glass {
@@ -105,26 +108,26 @@
 
   .dock-glass {
     background: var(--dock-glass);
-    @apply backdrop-blur-2xl border border-border/50 shadow-2xl shadow-emerald-900/10;
+    @apply backdrop-blur-2xl border border-white/80 shadow-xl shadow-rose-500/10;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-           bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 text-white font-medium
-           shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full
+           bg-gradient-to-br from-rose-400 via-amber-300 to-emerald-400 text-stone-800 font-semibold
+           shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40
            hover:scale-[1.02] active:scale-[0.98] transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-           glass font-medium hover:bg-white/20 active:scale-[0.98]
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full
+           glass font-medium hover:bg-white/40 active:scale-[0.98]
            transition-all duration-200;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl glass border border-white/10
-           focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+    @apply w-full px-4 py-3 rounded-2xl glass border border-white/20
+           focus:outline-none focus:ring-2 focus:ring-rose-400/40
            placeholder:text-muted-foreground
            transition-all duration-200;
   }
@@ -150,53 +153,66 @@
   }
 
   .scan-ring {
-    @apply absolute inset-0 border-2 border-emerald-400/50 rounded-2xl;
+    @apply absolute inset-0 border-2 border-rose-300/50 rounded-2xl;
     animation: scan-pulse 2s ease-in-out infinite;
   }
 
   .scan-line {
-    @apply absolute start-4 end-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent;
+    @apply absolute start-4 end-4 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent;
     animation: scan-sweep 2.5s ease-in-out infinite;
   }
 
   .nav-link {
     @apply relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium
            text-muted-foreground transition-all duration-200
-           hover:text-foreground hover:bg-emerald-500/10;
+           hover:text-foreground hover:bg-rose-400/10;
   }
 
   .nav-link-active {
-    @apply text-emerald-700 dark:text-emerald-300 bg-emerald-500/10
-           shadow-[inset_0_0_0_1px] shadow-emerald-500/15;
+    @apply text-rose-600 dark:text-rose-300 bg-rose-400/10
+           shadow-[inset_0_0_0_1px] shadow-rose-400/20;
   }
 
   .dock-item {
-    @apply relative flex flex-1 flex-col items-center justify-center gap-0.5
-           min-w-0 py-1.5 px-1 rounded-2xl transition-all duration-200
+    @apply relative flex flex-col items-center justify-end gap-0.5
+           min-w-0 min-h-[50px] py-1 px-0.5 rounded-full transition-all duration-200
            text-muted-foreground active:scale-95;
   }
 
   .dock-item-active {
-    @apply text-emerald-600 dark:text-emerald-400;
+    @apply text-rose-600 dark:text-rose-300;
+  }
+
+  .dock-ico {
+    @apply flex h-[26px] w-8 items-center justify-center rounded-xl transition-all duration-200;
+  }
+
+  .dock-ico-active {
+    @apply bg-gradient-to-b from-rose-300/45 to-violet-300/30;
+  }
+
+  .dock-dot {
+    @apply absolute bottom-0 h-1 w-1 rounded-full bg-rose-500
+           shadow-[0_0_0_3px] shadow-rose-500/20;
   }
 
   .dock-scan {
-    @apply relative -mt-7 flex h-14 w-14 items-center justify-center rounded-2xl
-           bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-700
-           text-white shadow-xl shadow-emerald-500/40
-           ring-4 ring-background transition-transform duration-200
+    @apply relative -mt-7 flex h-[58px] w-[58px] items-center justify-center rounded-full
+           bg-gradient-to-br from-rose-400 via-amber-300 to-emerald-400
+           text-white shadow-xl shadow-rose-500/40
+           ring-4 ring-white dark:ring-background transition-transform duration-200
            active:scale-95 hover:scale-105;
   }
 
   .sidebar-link {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
            text-muted-foreground transition-all duration-200
-           hover:bg-emerald-500/10 hover:text-foreground;
+           hover:bg-rose-400/10 hover:text-foreground;
   }
 
   .sidebar-link-active {
-    @apply bg-gradient-to-l from-emerald-500/15 to-emerald-500/5 text-emerald-700
-           dark:text-emerald-300 shadow-[inset_3px_0_0_0] shadow-emerald-500;
+    @apply bg-gradient-to-l from-rose-400/15 to-amber-300/10 text-rose-700
+           dark:text-rose-300 shadow-[inset_3px_0_0_0] shadow-rose-400;
   }
 
   html[dir="ltr"] .sidebar-link-active {
@@ -216,9 +232,9 @@
   }
 
   .brand-mark {
-    @apply w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-700
-           flex items-center justify-center shadow-lg shadow-emerald-500/25
-           ring-1 ring-white/30;
+    @apply w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-400 via-amber-300 to-emerald-400
+           flex items-center justify-center shadow-lg shadow-rose-500/25
+           ring-1 ring-white/40;
   }
 }
 

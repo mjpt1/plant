@@ -10,7 +10,7 @@ export const siteConfig = {
     "شناسایی گیاه، تشخیص بیماری، ارتباط با باغبانان و مدیریت برنامه مراقبت از گیاهان.",
   url: resolveAppUrl(),
   locale: "fa_IR",
-  themeColor: "#10b981",
+  themeColor: "#ff9ea0",
   keywords: [
     "گیاه‌یار",
     "شناسایی گیاه",

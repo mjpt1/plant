@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: siteConfig.themeColor },
-    { media: "(prefers-color-scheme: dark)", color: "#065f46" },
+    { media: "(prefers-color-scheme: dark)", color: "#2a2433" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -79,7 +79,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Vazirmatn:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>

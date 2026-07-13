@@ -20,8 +20,8 @@ import {
   BadgeCheck,
   Shield,
   Settings,
-  MoreHorizontal,
   X,
+  Heart,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/context/LanguageContext";
@@ -37,35 +37,62 @@ type NavKey =
   | "calendar"
   | "dashboard"
   | "social"
-  | "qa";
+  | "qa"
+  | "care";
 
-type NavItem = {
+type DockItem = {
   href: string;
   icon: typeof Leaf;
   key: NavKey;
+  labelKey?: "home" | "care" | "scan" | "calendar" | "me" | "catalog";
 };
 
-const guestPrimary: NavItem[] = [
-  { href: "/", icon: Leaf, key: "home" },
-  { href: "/catalog", icon: BookOpen, key: "catalog" },
-  { href: "/scan", icon: Camera, key: "scan" },
-  { href: "/calendar", icon: Calendar, key: "calendar" },
+const guestDock: DockItem[] = [
+  { href: "/", icon: Leaf, key: "home", labelKey: "home" },
+  { href: "/catalog", icon: Heart, key: "catalog", labelKey: "care" },
+  { href: "/scan", icon: Camera, key: "scan", labelKey: "scan" },
+  { href: "/calendar", icon: Calendar, key: "calendar", labelKey: "calendar" },
 ];
 
-const authPrimary: NavItem[] = [
-  { href: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
-  { href: "/plants", icon: Sprout, key: "myPlants" },
-  { href: "/scan", icon: Camera, key: "scan" },
-  { href: "/calendar", icon: Calendar, key: "calendar" },
+const authDock: DockItem[] = [
+  { href: "/dashboard", icon: LayoutDashboard, key: "dashboard", labelKey: "home" },
+  { href: "/plants", icon: Sprout, key: "myPlants", labelKey: "care" },
+  { href: "/scan", icon: Camera, key: "scan", labelKey: "scan" },
+  { href: "/calendar", icon: Calendar, key: "calendar", labelKey: "calendar" },
 ];
 
-const communityItems: NavItem[] = [
-  { href: "/social", icon: MessageCircle, key: "social" },
-  { href: "/qa", icon: MessageCircleQuestion, key: "qa" },
+const desktopPrimaryGuest = [
+  { href: "/", icon: Leaf, key: "home" as const },
+  { href: "/catalog", icon: BookOpen, key: "catalog" as const },
+  { href: "/scan", icon: Camera, key: "scan" as const },
+  { href: "/calendar", icon: Calendar, key: "calendar" as const },
+];
+
+const desktopPrimaryAuth = [
+  { href: "/dashboard", icon: LayoutDashboard, key: "dashboard" as const },
+  { href: "/plants", icon: Sprout, key: "myPlants" as const },
+  { href: "/scan", icon: Camera, key: "scan" as const },
+  { href: "/calendar", icon: Calendar, key: "calendar" as const },
+];
+
+const communityItems = [
+  { href: "/social", icon: MessageCircle, key: "social" as const },
+  { href: "/qa", icon: MessageCircleQuestion, key: "qa" as const },
 ];
 
 function isActivePath(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
+function dockLabel(
+  t: ReturnType<typeof useLanguage>["t"],
+  item: DockItem
+) {
+  if (item.labelKey === "me") return t.nav.me;
+  if (item.labelKey === "care") return t.nav.care;
+  if (item.labelKey === "home") return t.nav.home;
+  if (item.labelKey === "catalog") return t.nav.catalog;
+  return t.nav[item.key === "dashboard" ? "dashboard" : item.key];
 }
 
 export default function Navbar() {
@@ -76,9 +103,12 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const primary = user ? authPrimary : guestPrimary;
-  const dockItems = primary.filter((item) => item.key !== "scan");
-  const scanItem = primary.find((item) => item.key === "scan")!;
+  const dock = user ? authDock : guestDock;
+  const desktopPrimary = user ? desktopPrimaryAuth : desktopPrimaryGuest;
+  const sideItems = dock.filter((item) => item.key !== "scan");
+  const scanItem = dock.find((item) => item.key === "scan")!;
+  const leftItems = sideItems.slice(0, 2);
+  const rightItems = sideItems.slice(2);
 
   useEffect(() => {
     setMoreOpen(false);
@@ -106,7 +136,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
             <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
               <div className="brand-mark group-hover:scale-105 transition-transform">
-                <Leaf className="w-5 h-5 text-white" />
+                <Leaf className="w-5 h-5 text-white drop-shadow-sm" />
               </div>
               <div className="leading-tight hidden sm:block">
                 <span className="block font-bold text-[15px] tracking-tight text-foreground">
@@ -119,7 +149,7 @@ export default function Navbar() {
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1">
-              {primary.map(({ href, icon: Icon, key }) => (
+              {desktopPrimary.map(({ href, icon: Icon, key }) => (
                 <Link
                   key={href}
                   href={href}
@@ -154,7 +184,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-emerald-500/10 transition-colors"
+                className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-rose-400/10 transition-colors"
                 aria-label="Toggle theme"
               >
                 {theme === "dark" ? (
@@ -171,13 +201,13 @@ export default function Navbar() {
                     setProfileOpen((v) => !v);
                     setMoreOpen(false);
                   }}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-emerald-500/10 transition-colors"
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-rose-400/10 transition-colors"
                   aria-expanded={profileOpen}
                   aria-label={t.nav.menu}
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-700 flex items-center justify-center ring-2 ring-background shadow-md shadow-emerald-500/20">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 via-amber-300 to-violet-400 flex items-center justify-center ring-2 ring-background shadow-md shadow-rose-400/25">
                     {user ? (
-                      <span className="text-white text-sm font-semibold">
+                      <span className="text-white text-sm font-semibold drop-shadow-sm">
                         {user.name.charAt(0).toUpperCase()}
                       </span>
                     ) : (
@@ -202,7 +232,7 @@ export default function Navbar() {
                         <Link
                           href="/dashboard"
                           onClick={closeMenus}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                         >
                           <LayoutDashboard className="w-4 h-4" />
                           {t.nav.dashboard}
@@ -210,7 +240,7 @@ export default function Navbar() {
                         <Link
                           href="/settings"
                           onClick={closeMenus}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                         >
                           <Settings className="w-4 h-4" />
                           {t.dashboard.actions.settings}
@@ -218,7 +248,7 @@ export default function Navbar() {
                         <Link
                           href={`/profile/${user.username}`}
                           onClick={closeMenus}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                         >
                           <User className="w-4 h-4" />
                           {t.nav.profile}
@@ -227,7 +257,7 @@ export default function Navbar() {
                           <Link
                             href="/expert"
                             onClick={closeMenus}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                           >
                             <BadgeCheck className="w-4 h-4" />
                             {t.expert.title}
@@ -237,7 +267,7 @@ export default function Navbar() {
                           <Link
                             href="/admin"
                             onClick={closeMenus}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                           >
                             <Shield className="w-4 h-4" />
                             {t.admin.title}
@@ -249,7 +279,7 @@ export default function Navbar() {
                             logout();
                             closeMenus();
                           }}
-                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/8"
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10"
                         >
                           <LogOut className="w-4 h-4" />
                           {t.nav.logout}
@@ -259,7 +289,7 @@ export default function Navbar() {
                       <Link
                         href="/auth/login"
                         onClick={closeMenus}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-500/8"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-rose-400/10"
                       >
                         <LogIn className="w-4 h-4" />
                         {t.nav.login}
@@ -273,51 +303,47 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile floating dock */}
+      {/* Mobile floating dock — 5 tabs, scan larger in center */}
       <nav
         className="fixed bottom-3 inset-x-3 z-50 md:hidden safe-bottom"
         aria-label={t.nav.menu}
       >
-        <div className="dock-glass rounded-[1.75rem] px-2 pt-2 pb-1.5 flex items-end justify-between gap-1">
-          {dockItems.slice(0, 2).map(({ href, icon: Icon, key }) => {
+        <div className="dock-glass grid grid-cols-5 items-end gap-0 rounded-full px-1.5 pt-1.5 pb-2">
+          {leftItems.map(({ href, icon: Icon, key, labelKey }) => {
             const active = isActivePath(pathname, href);
             return (
               <Link
-                key={href}
+                key={href + key}
                 href={href}
                 className={cn("dock-item", active && "dock-item-active")}
               >
-                <span
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
-                    active && "bg-emerald-500/15 animate-dock-pop"
-                  )}
-                >
-                  <Icon className="w-5 h-5" strokeWidth={active ? 2.4 : 2} />
+                <span className={cn("dock-ico", active && "dock-ico-active animate-dock-pop")}>
+                  <Icon className="w-[19px] h-[19px]" strokeWidth={active ? 2.4 : 1.9} />
                 </span>
-                <span className="text-[10px] font-semibold truncate max-w-[4.5rem]">
-                  {t.nav[key]}
+                <span className="text-[10px] font-bold truncate max-w-full leading-tight">
+                  {dockLabel(t, { href, icon: Icon, key, labelKey })}
                 </span>
+                {active && <span className="dock-dot" aria-hidden />}
               </Link>
             );
           })}
 
           <Link
             href={scanItem.href}
-            className="flex flex-col items-center gap-0.5 px-1 min-w-[4.25rem]"
+            className="dock-item text-emerald-500"
             aria-label={t.nav.scan}
           >
             <span
               className={cn(
                 "dock-scan",
-                isActivePath(pathname, scanItem.href) && "ring-emerald-300/50"
+                isActivePath(pathname, scanItem.href) && "scale-105 ring-emerald-200"
               )}
             >
-              <Camera className="w-6 h-6" />
+              <Camera className="w-6 h-6" strokeWidth={2.1} />
             </span>
             <span
               className={cn(
-                "text-[10px] font-semibold",
+                "text-[10px] font-bold leading-tight",
                 isActivePath(pathname, scanItem.href)
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-muted-foreground"
@@ -325,27 +351,26 @@ export default function Navbar() {
             >
               {t.nav.scan}
             </span>
+            {isActivePath(pathname, scanItem.href) && (
+              <span className="dock-dot !bg-emerald-500 !shadow-emerald-500/25" aria-hidden />
+            )}
           </Link>
 
-          {dockItems.slice(2).map(({ href, icon: Icon, key }) => {
+          {rightItems.map(({ href, icon: Icon, key, labelKey }) => {
             const active = isActivePath(pathname, href);
             return (
               <Link
-                key={href}
+                key={href + key}
                 href={href}
                 className={cn("dock-item", active && "dock-item-active")}
               >
-                <span
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
-                    active && "bg-emerald-500/15 animate-dock-pop"
-                  )}
-                >
-                  <Icon className="w-5 h-5" strokeWidth={active ? 2.4 : 2} />
+                <span className={cn("dock-ico", active && "dock-ico-active animate-dock-pop")}>
+                  <Icon className="w-[19px] h-[19px]" strokeWidth={active ? 2.4 : 1.9} />
                 </span>
-                <span className="text-[10px] font-semibold truncate max-w-[4.5rem]">
-                  {t.nav[key]}
+                <span className="text-[10px] font-bold truncate max-w-full leading-tight">
+                  {dockLabel(t, { href, icon: Icon, key, labelKey })}
                 </span>
+                {active && <span className="dock-dot" aria-hidden />}
               </Link>
             );
           })}
@@ -357,17 +382,13 @@ export default function Navbar() {
               setProfileOpen(false);
             }}
             className={cn("dock-item", moreOpen && "dock-item-active")}
-            aria-label={t.nav.more}
+            aria-label={t.nav.me}
           >
-            <span
-              className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
-                moreOpen && "bg-emerald-500/15"
-              )}
-            >
-              <MoreHorizontal className="w-5 h-5" />
+            <span className={cn("dock-ico", moreOpen && "dock-ico-active")}>
+              <User className="w-[19px] h-[19px]" strokeWidth={moreOpen ? 2.4 : 1.9} />
             </span>
-            <span className="text-[10px] font-semibold">{t.nav.more}</span>
+            <span className="text-[10px] font-bold leading-tight">{t.nav.me}</span>
+            {moreOpen && <span className="dock-dot" aria-hidden />}
           </button>
         </div>
       </nav>
@@ -386,13 +407,13 @@ export default function Navbar() {
             </div>
             <div className="flex items-center justify-between px-5 pb-3">
               <div>
-                <p className="font-bold text-base">{t.nav.more}</p>
+                <p className="font-bold text-base">{t.nav.me}</p>
                 <p className="text-xs text-muted-foreground">{t.nav.community}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMoreOpen(false)}
-                className="p-2 rounded-xl hover:bg-emerald-500/10 text-muted-foreground"
+                className="p-2 rounded-xl hover:bg-rose-400/10 text-muted-foreground"
                 aria-label={t.common.close}
               >
                 <X className="w-5 h-5" />
@@ -418,13 +439,13 @@ export default function Navbar() {
                       href={href}
                       onClick={() => setMoreOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 px-3.5 py-3.5 text-sm font-medium transition-colors hover:border-emerald-500/30 hover:bg-emerald-500/8",
+                        "flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 px-3.5 py-3.5 text-sm font-medium transition-colors hover:border-rose-400/30 hover:bg-rose-400/10",
                         isActivePath(pathname, href) &&
-                          "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                          "border-rose-400/35 bg-rose-400/10 text-rose-700 dark:text-rose-300"
                       )}
                     >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400">
-                        <Icon className="w-4.5 h-4.5 w-[18px] h-[18px]" />
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-300/40 to-amber-200/40 text-rose-600 dark:text-rose-300">
+                        <Icon className="w-[18px] h-[18px]" />
                       </span>
                       {t.nav[key]}
                     </Link>
@@ -443,9 +464,9 @@ export default function Navbar() {
                       href={href}
                       onClick={() => setMoreOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-colors hover:bg-emerald-500/8",
+                        "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium transition-colors hover:bg-rose-400/10",
                         isActivePath(pathname, href) &&
-                          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                          "bg-rose-400/10 text-rose-700 dark:text-rose-300"
                       )}
                     >
                       <Icon className="w-5 h-5" />
@@ -461,7 +482,7 @@ export default function Navbar() {
                     <Link
                       href="/settings"
                       onClick={() => setMoreOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-emerald-500/8"
+                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-rose-400/10"
                     >
                       <Settings className="w-5 h-5" />
                       {t.dashboard.actions.settings}
@@ -469,7 +490,7 @@ export default function Navbar() {
                     <Link
                       href={`/profile/${user.username}`}
                       onClick={() => setMoreOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-emerald-500/8"
+                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium hover:bg-rose-400/10"
                     >
                       <User className="w-5 h-5" />
                       {t.nav.profile}
@@ -480,7 +501,7 @@ export default function Navbar() {
                         logout();
                         setMoreOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-500 hover:bg-red-500/8"
+                      className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-red-500 hover:bg-red-500/10"
                     >
                       <LogOut className="w-5 h-5" />
                       {t.nav.logout}
@@ -490,7 +511,7 @@ export default function Navbar() {
                   <Link
                     href="/auth/login"
                     onClick={() => setMoreOpen(false)}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 px-3 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25"
+                    className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-rose-400 via-amber-300 to-emerald-400 px-3 py-3.5 text-sm font-semibold text-stone-800 shadow-lg shadow-rose-400/25"
                   >
                     <LogIn className="w-5 h-5" />
                     {t.nav.login}

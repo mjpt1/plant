@@ -20,6 +20,7 @@ export const en = {
     menu: "Menu",
     care: "Care",
     community: "Community",
+    me: "Me",
   },
   theme: {
     light: "Light",

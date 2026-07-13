@@ -22,6 +22,7 @@ export const fa: TranslationKeys = {
     menu: "منو",
     care: "مراقبت",
     community: "جامعه",
+    me: "من",
   },
   theme: {
     light: "روشن",
