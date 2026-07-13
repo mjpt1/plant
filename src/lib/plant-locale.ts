@@ -195,6 +195,16 @@ const EN_FA_PHRASES: [string, string][] = [
   ["north-facing window", "پنجره شمالی"],
   ["south-facing window", "پنجره جنوبی"],
   ["west-facing window", "پنجره غربی"],
+  ["Take a closer photo", "عکس نزدیک‌تری بگیرید"],
+  ["Remove damaged leaves", "برگ‌های آسیب‌دیده را جدا کنید"],
+  ["Avoid overwatering", "از آبیاری بیش از حد پرهیز کنید"],
+  ["toxic to pets and humans", "سمی برای حیوانات خانگی و انسان"],
+  ["Toxic if ingested", "در صورت بلع سمی است"],
+  ["Keep away from pets", "دور از حیوانات خانگی نگه دارید"],
+  ["may be toxic", "ممکن است سمی باشد"],
+  ["Not toxic", "غیرسمی"],
+  ["Mildly toxic", "کمی سمی"],
+  ["Highly toxic", "بسیار سمی"],
 ];
 
 const EN_FA_WORDS: [string, string][] = [
@@ -399,10 +409,13 @@ export function localizePlantText(
     if (isPrimarilyPersian(trimmed)) return trimmed;
     const translated = translateEnToFa(trimmed);
     if (isPrimarilyPersian(translated)) return translated;
-    // Long English catalog prose → prefer structured FA blurb over raw English
-    if (fallbackFa?.trim() && trimmed.length > 80) return fallbackFa.trim();
-    if (fallbackFa?.trim() && countPersianChars(translated) < 8) {
-      return fallbackFa.trim();
+    if (fallbackFa?.trim()) return fallbackFa.trim();
+    // Never leave long English blocks in FA UI
+    if (trimmed.length > 40 && !isPrimarilyPersian(translated)) {
+      return "راهنمای فارسی این بخش هنوز کامل نیست؛ از دستیار گیاه‌یار یا کارشناس بپرسید.";
+    }
+    if (!isPrimarilyPersian(translated) && countPersianChars(translated) < 3) {
+      return "توضیح فارسی در دسترس نیست.";
     }
     return translated;
   }
@@ -435,10 +448,18 @@ export function localizeCatalogPlant<T extends PlantNameFields & PlantTextFields
     displayName,
     displayCategory,
     displayDescription: localizePlantText(plant.description, locale, faBlurb),
-    displayWateringGuide: localizePlantText(plant.wateringGuide, locale),
-    displayLightGuide: localizePlantText(plant.lightGuide, locale),
-    displayFertilizerGuide: localizePlantText(plant.fertilizerGuide, locale),
-    displaySoilGuide: localizePlantText(plant.soilGuide, locale),
+    displayWateringGuide: localizePlantText(
+      plant.wateringGuide,
+      locale,
+      faBlurb
+    ),
+    displayLightGuide: localizePlantText(plant.lightGuide, locale, faBlurb),
+    displayFertilizerGuide: localizePlantText(
+      plant.fertilizerGuide,
+      locale,
+      faBlurb
+    ),
+    displaySoilGuide: localizePlantText(plant.soilGuide, locale, faBlurb),
     displayToxicity: localizePlantText(plant.toxicity, locale),
     displaySunRequirement: localizeEnumValue(
       plant.sunRequirement,
@@ -578,6 +599,36 @@ export function localizeAnalysisResult(
       prevention: localizeStringArray(analysis.treatment.prevention, locale),
       warnings: localizeStringArray(analysis.treatment.warnings, locale),
     },
-    meta: analysis.meta,
+    meta: analysis.meta
+      ? {
+          ...analysis.meta,
+          toxicityWarning:
+            localizePlantText(analysis.meta.toxicityWarning, locale) ||
+            analysis.meta.toxicityWarning ||
+            "",
+          speciesCandidates: (analysis.meta.speciesCandidates || []).map((c) => {
+            const localized = localizePlantName(
+              {
+                nameEn: c.commonName || c.scientificName,
+                nameFa: "",
+                scientificName: c.scientificName,
+              },
+              locale
+            );
+            const showName =
+              localized &&
+              localized !== c.scientificName &&
+              !/^[A-Z][a-z]+(?:\s+[a-z]+)+$/.test(localized)
+                ? localized
+                : locale === "fa"
+                  ? ""
+                  : c.commonName;
+            return {
+              ...c,
+              commonName: showName || (locale === "fa" ? "" : c.commonName),
+            };
+          }),
+        }
+      : analysis.meta,
   };
 }

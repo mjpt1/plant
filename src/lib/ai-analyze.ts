@@ -178,7 +178,7 @@ function buildPlantDescription(
   if (catalog?.geographicArea && !catalog.description?.includes("پراکنش")) {
     parts.push(
       fa
-        ? `پراکنش: ${catalog.geographicArea}`
+        ? `پراکنش: ${localizePlantText(catalog.geographicArea, lang) || "نامشخص"}`
         : `Distribution: ${catalog.geographicArea}`
     );
   }

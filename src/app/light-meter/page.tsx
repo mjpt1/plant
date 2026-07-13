@@ -304,7 +304,7 @@ export default function LightMeterPage() {
             stop();
             void start();
           }}
-          aria-label="refresh"
+          aria-label={fa ? "اندازه‌گیری دوباره" : "refresh"}
         >
           <RefreshCw className="w-4 h-4" />
         </button>

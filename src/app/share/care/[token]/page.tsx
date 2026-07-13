@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { getHealthStatusLabel } from "@/lib/healthStatus";
 import { Loader2, Share2 } from "lucide-react";
 
 export default function CareSharePage() {
   const params = useParams();
   const token = String(params.token || "");
-  const { locale } = useLanguage();
+  const { locale, t } = useLanguage();
   const [data, setData] = useState<{
     sharedBy: { name: string; username: string };
     plant: {
@@ -78,7 +79,8 @@ export default function CareSharePage() {
       </div>
       <h1 className="text-2xl font-bold">{name}</h1>
       <p className="text-sm text-muted-foreground">
-        {locale === "fa" ? "وضعیت:" : "Status:"} {data.plant.healthStatus}
+        {locale === "fa" ? "وضعیت:" : "Status:"}{" "}
+        {getHealthStatusLabel(data.plant.healthStatus, t)}
       </p>
       <div className="space-y-2">
         <h2 className="font-semibold">

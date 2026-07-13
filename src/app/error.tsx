@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+function readLocale(): "fa" | "en" {
+  if (typeof document === "undefined") return "fa";
+  const match = document.cookie.match(/(?:^|;\s*)plantcare-locale=([^;]+)/);
+  if (match?.[1] === "en") return "en";
+  if (document.documentElement.lang?.startsWith("en")) return "en";
+  return "fa";
+}
 
 export default function Error({
   error,
@@ -9,9 +17,13 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [locale, setLocale] = useState<"fa" | "en">("fa");
   useEffect(() => {
     console.error(error);
+    setLocale(readLocale());
   }, [error]);
+
+  const fa = locale === "fa";
 
   return (
     <div
@@ -24,13 +36,16 @@ export default function Error({
         padding: "1rem",
         textAlign: "center",
       }}
+      dir={fa ? "rtl" : "ltr"}
     >
       <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🌿</div>
       <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.5rem" }}>
-        Something went wrong
+        {fa ? "مشکلی پیش آمد" : "Something went wrong"}
       </h1>
       <p style={{ color: "#6b7280", marginBottom: "1.5rem", maxWidth: "28rem" }}>
-        We hit an unexpected error. Please try again.
+        {fa
+          ? "خطای غیرمنتظره‌ای رخ داد. لطفاً دوباره تلاش کنید."
+          : "We hit an unexpected error. Please try again."}
       </p>
       <div style={{ display: "flex", gap: "0.75rem" }}>
         <button
@@ -46,7 +61,7 @@ export default function Error({
             fontWeight: 600,
           }}
         >
-          Try again
+          {fa ? "تلاش دوباره" : "Try again"}
         </button>
         <button
           type="button"
@@ -63,7 +78,7 @@ export default function Error({
             fontWeight: 600,
           }}
         >
-          Go home
+          {fa ? "بازگشت به خانه" : "Go home"}
         </button>
       </div>
     </div>

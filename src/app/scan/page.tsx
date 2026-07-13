@@ -304,7 +304,18 @@ export default function ScanPage() {
       });
       const data = await res.json();
       clearInterval(stepInterval);
-      if (!res.ok) throw new Error(data.error || t.scan.errors.analysisFailed);
+      if (!res.ok) {
+        const raw = String(data.error || "");
+        const faMsg =
+          /unauthorized/i.test(raw)
+            ? "لطفاً وارد شوید."
+            : /too many/i.test(raw)
+              ? "تعداد درخواست زیاد است. کمی بعد دوباره تلاش کنید."
+              : /no image|image/i.test(raw)
+                ? "تصویری ارسال نشده است."
+                : t.scan.errors.analysisFailed;
+        throw new Error(locale === "fa" ? faMsg : raw || t.scan.errors.analysisFailed);
+      }
       setResult({
         ...data.data,
         meta: data.meta || data.data?.meta,
@@ -512,7 +523,7 @@ export default function ScanPage() {
                 autoPlay
               />
             ) : imagePreview ? (
-              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              <img src={imagePreview} alt={locale === "fa" ? "پیش‌نمایش" : "Preview"} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-500/5 px-6 text-center">
                 <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-4">
@@ -735,7 +746,7 @@ export default function ScanPage() {
         <div className="space-y-5 sm:space-y-6 animate-fade-in">
           {imagePreview && (
             <div className="relative aspect-video rounded-2xl overflow-hidden glass-card">
-              <img src={imagePreview} alt="Scanned" className="w-full h-full object-cover" />
+              <img src={imagePreview} alt={locale === "fa" ? "تصویر اسکن‌شده" : "Scanned"} className="w-full h-full object-cover" />
               <div className="absolute top-3 end-3 sm:top-4 sm:end-4 flex flex-wrap items-center justify-end gap-2 max-w-[70%]">
                 <Badge variant={healthVariant(displayResult.health.status)}>
                   {getHealthStatusLabel(displayResult.health.status, t)}
@@ -820,7 +831,10 @@ export default function ScanPage() {
                         >
                           <span className="min-w-0">
                             <span className="font-medium block truncate">
-                              {c.commonName || c.scientificName}
+                              {c.commonName ||
+                                (locale === "fa"
+                                  ? "نام رایج نامشخص"
+                                  : c.scientificName)}
                             </span>
                             <span className="text-xs text-muted-foreground italic truncate block">
                               {c.scientificName}

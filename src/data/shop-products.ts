@@ -18,9 +18,13 @@ export type ShopProduct = {
   tags: string[];
   forProblems: string[];
   inStock: boolean;
+  /** Digikala search query (Persian). */
+  digikalaQuery: string;
+  /** Amazon search query (English). */
+  amazonQuery: string;
 };
 
-/** Curated Iran-market care products (v1 catalog; checkout can wire later). */
+/** Curated care products with marketplace search queries. */
 export const SHOP_PRODUCTS: ShopProduct[] = [
   {
     id: "bordofix-100",
@@ -29,11 +33,22 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     nameEn: "Bordeaux mix 100ml",
     category: "fungicide",
     priceToman: 45000,
-    summaryFa: "قارچ‌کش و باکتری‌کش مسی برای لکه برگی، سفیدک و بیماری‌های قارچی رایج آپارتمانی.",
-    summaryEn: "Copper fungicide for leaf spot, mildew, and common indoor fungal issues.",
+    summaryFa:
+      "قارچ‌کش و باکتری‌کش مسی برای لکه برگی، سفیدک و بیماری‌های قارچی رایج آپارتمانی.",
+    summaryEn:
+      "Copper fungicide for leaf spot, mildew, and common indoor fungal issues.",
     tags: ["قارچ", "لکه", "سفیدک"],
-    forProblems: ["powdery mildew", "leaf spot", "سفیدک", "لکه برگی", "rust", "زنگ"],
+    forProblems: [
+      "powdery mildew",
+      "leaf spot",
+      "سفیدک",
+      "لکه برگی",
+      "rust",
+      "زنگ",
+    ],
     inStock: true,
+    digikalaQuery: "بردوفیکس قارچ کش",
+    amazonQuery: "bordeaux mixture copper fungicide plants",
   },
   {
     id: "confidor-50",
@@ -42,11 +57,22 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     nameEn: "Confidor 50ml",
     category: "insecticide",
     priceToman: 180000,
-    summaryFa: "حشره‌کش سیستمیک برای شته، تریپس و برخی مکنده‌ها — با احتیاط و دوز دقیق استفاده شود.",
-    summaryEn: "Systemic insecticide for aphids and thrips — use carefully at labeled dose.",
+    summaryFa:
+      "حشره‌کش سیستمیک برای شته، تریپس و برخی مکنده‌ها — با احتیاط و دوز دقیق استفاده شود.",
+    summaryEn:
+      "Systemic insecticide for aphids and thrips — use carefully at labeled dose.",
     tags: ["شته", "تریپس", "آفت"],
-    forProblems: ["aphid", "شته", "thrips", "تریپس", "whitefly", "مگس سفید"],
+    forProblems: [
+      "aphid",
+      "شته",
+      "thrips",
+      "تریپس",
+      "whitefly",
+      "مگس سفید",
+    ],
     inStock: true,
+    digikalaQuery: "کنفیدور حشره کش",
+    amazonQuery: "imidacloprid confidor insecticide plants",
   },
   {
     id: "neem-oil",
@@ -55,11 +81,14 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     nameEn: "Neem oil",
     category: "insecticide",
     priceToman: 120000,
-    summaryFa: "گزینه ملایم‌تر برای شپشک آردی، کنه و پیشگیری دوره‌ای روی گیاهان آپارتمانی.",
+    summaryFa:
+      "گزینه ملایم‌تر برای شپشک آردی، کنه و پیشگیری دوره‌ای روی گیاهان آپارتمانی.",
     summaryEn: "Gentler option for mealybugs, mites, and preventive sprays.",
     tags: ["ارگانیک", "کنه", "شپشک"],
     forProblems: ["mealybug", "شپشک", "mite", "کنه", "spider"],
     inStock: true,
+    digikalaQuery: "روغن چریش گیاهی",
+    amazonQuery: "neem oil spray for plants",
   },
   {
     id: "insect-soap",
@@ -73,6 +102,8 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     tags: ["شته", "ایمن‌تر"],
     forProblems: ["aphid", "شته", "mealybug", "شپشک"],
     inStock: true,
+    digikalaQuery: "صابون حشره کش گیاه",
+    amazonQuery: "insecticidal soap for houseplants",
   },
   {
     id: "npk-20",
@@ -81,11 +112,15 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     nameEn: "NPK 20-20-20",
     category: "fertilizer",
     priceToman: 85000,
-    summaryFa: "کود متعادل رشد برای فصل بهار و تابستان؛ هر ۳–۴ هفته رقیق‌شده.",
-    summaryEn: "Balanced grow fertilizer for spring/summer; dilute every 3–4 weeks.",
+    summaryFa:
+      "کود متعادل رشد برای فصل بهار و تابستان؛ هر ۳–۴ هفته رقیق‌شده.",
+    summaryEn:
+      "Balanced grow fertilizer for spring/summer; dilute every 3–4 weeks.",
     tags: ["کود", "رشد"],
     forProblems: ["nutrient", "کمبود", "deficiency", "کلروز"],
     inStock: true,
+    digikalaQuery: "کود NPK 20 20 20",
+    amazonQuery: "NPK 20-20-20 plant fertilizer",
   },
   {
     id: "iron-chelate",
@@ -95,10 +130,13 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     category: "fertilizer",
     priceToman: 110000,
     summaryFa: "برای زردی بین رگبرگی (کمبود آهن) در گیاهان آپارتمانی حساس.",
-    summaryEn: "For interveinal yellowing (iron deficiency) on sensitive houseplants.",
+    summaryEn:
+      "For interveinal yellowing (iron deficiency) on sensitive houseplants.",
     tags: ["آهن", "زردی"],
     forProblems: ["iron", "آهن", "chlorosis", "کلروز"],
     inStock: true,
+    digikalaQuery: "کود آهن کلاته گیاه",
+    amazonQuery: "chelated iron fertilizer for plants",
   },
   {
     id: "potting-mix",
@@ -112,6 +150,8 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     tags: ["خاک", "زهکشی"],
     forProblems: ["root rot", "پوسیدگی ریشه", "overwater"],
     inStock: true,
+    digikalaQuery: "خاک گلدان زهکش دار",
+    amazonQuery: "well draining potting mix indoor plants",
   },
   {
     id: "grow-light",
@@ -125,6 +165,8 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     tags: ["نور", "LED"],
     forProblems: ["low light", "نور کم", "dark"],
     inStock: true,
+    digikalaQuery: "لامپ رشد گیاه LED",
+    amazonQuery: "LED grow light bar for indoor plants",
   },
   {
     id: "spray-bottle",
@@ -138,6 +180,8 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     tags: ["ابزار"],
     forProblems: [],
     inStock: true,
+    digikalaQuery: "سمپاش دستی ۲ لیتری",
+    amazonQuery: "2 liter garden hand sprayer bottle",
   },
 ];
 
@@ -146,7 +190,10 @@ export function productsForProblems(
   limit = 4
 ): ShopProduct[] {
   if (!labels.length) {
-    return SHOP_PRODUCTS.filter((p) => p.category === "fertilizer").slice(0, limit);
+    return SHOP_PRODUCTS.filter((p) => p.category === "fertilizer").slice(
+      0,
+      limit
+    );
   }
   const joined = labels.join(" ").toLowerCase();
   const scored = SHOP_PRODUCTS.map((p) => {

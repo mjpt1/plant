@@ -2,14 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ExternalLink, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { useLocaleFormat } from "@/hooks/useLocaleFormat";
 import {
   SHOP_PRODUCTS,
   type ShopCategory,
   type ShopProduct,
 } from "@/data/shop-products";
+import {
+  isUserInIran,
+  marketplaceBuyUrl,
+} from "@/lib/shop-marketplace";
 
 const CATEGORIES: ShopCategory[] = [
   "fungicide",
@@ -22,10 +27,11 @@ const CATEGORIES: ShopCategory[] = [
 
 export default function ShopPage() {
   const { locale } = useLanguage();
+  const { user } = useAuth();
   const { formatNumber } = useLocaleFormat();
   const fa = locale === "fa";
   const [cat, setCat] = useState<ShopCategory | "all">("all");
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const iran = isUserInIran({ country: user?.country, locale });
 
   const catLabel = (c: ShopCategory) => {
     const map: Record<ShopCategory, { fa: string; en: string }> = {
@@ -45,16 +51,13 @@ export default function ShopPage() {
     [cat]
   );
 
-  const total = useMemo(() => {
-    return Object.entries(cart).reduce((sum, [id, qty]) => {
-      const p = SHOP_PRODUCTS.find((x) => x.id === id);
-      return sum + (p ? p.priceToman * qty : 0);
-    }, 0);
-  }, [cart]);
-
-  const add = (p: ShopProduct) => {
-    setCart((prev) => ({ ...prev, [p.id]: (prev[p.id] || 0) + 1 }));
-  };
+  const buy = (p: ShopProduct) =>
+    marketplaceBuyUrl({
+      digikalaQuery: p.digikalaQuery,
+      amazonQuery: p.amazonQuery,
+      country: user?.country,
+      locale,
+    });
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -65,8 +68,22 @@ export default function ShopPage() {
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           {fa
-            ? "کود، سم و ابزار رایج بازار ایران — بعد از تشخیص بیماری، محصولات مرتبط پیشنهاد می‌شود."
-            : "Iran-market fertilizers, treatments, and tools — linked from disease diagnosis."}
+            ? iran
+              ? "خرید از دیجی‌کالا — بر اساس کشور پروفایل یا موقعیت شما."
+              : "خرید از آمازون — چون خارج از ایران تشخیص داده شدید. کشور را در تنظیمات می‌توانید عوض کنید."
+            : iran
+              ? "Checkout via Digikala based on your profile location."
+              : "Checkout via Amazon — set country to Iran in settings for Digikala."}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {fa
+            ? `بازار فعال: ${iran ? "دیجی‌کالا" : "آمازون"}`
+            : `Active market: ${iran ? "Digikala" : "Amazon"}`}
+          {user?.country
+            ? fa
+              ? ` · کشور پروفایل: ${user.country}`
+              : ` · Profile country: ${user.country}`
+            : ""}
         </p>
       </div>
 
@@ -95,63 +112,45 @@ export default function ShopPage() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {items.map((p) => (
-          <div key={p.id} className="glass-card p-4 flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-              {catLabel(p.category)}
-            </p>
-            <h2 className="font-semibold text-sm">
-              {fa ? p.nameFa : p.nameEn}
-            </h2>
-            <p className="text-xs text-muted-foreground flex-1">
-              {fa ? p.summaryFa : p.summaryEn}
-            </p>
-            <p className="text-sm font-bold">
-              {formatNumber(p.priceToman)} {fa ? "تومان" : "Toman"}
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="btn-primary text-sm flex-1"
-                onClick={() => add(p)}
-                disabled={!p.inStock}
-              >
-                {fa ? "افزودن" : "Add"}
-              </button>
-              <Link
-                href={`/shop/${p.slug}`}
-                className="btn-secondary text-sm px-3"
-              >
-                {fa ? "جزئیات" : "Details"}
-              </Link>
+        {items.map((p) => {
+          const link = buy(p);
+          return (
+            <div key={p.id} className="glass-card p-4 flex flex-col gap-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {catLabel(p.category)}
+              </p>
+              <h2 className="font-semibold text-sm">
+                {fa ? p.nameFa : p.nameEn}
+              </h2>
+              <p className="text-xs text-muted-foreground flex-1">
+                {fa ? p.summaryFa : p.summaryEn}
+              </p>
+              {iran && (
+                <p className="text-sm font-bold">
+                  {formatNumber(p.priceToman)} {fa ? "تومان ≈" : "Toman ≈"}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-sm flex-1 inline-flex items-center justify-center gap-1"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  {fa ? link.labelFa : link.labelEn}
+                </a>
+                <Link
+                  href={`/shop/${p.slug}`}
+                  className="btn-secondary text-sm px-3"
+                >
+                  {fa ? "جزئیات" : "Details"}
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-
-      {total > 0 && (
-        <div className="sticky bottom-20 lg:bottom-4 glass-card p-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm">
-            {fa ? "جمع سبد" : "Cart total"}:{" "}
-            <span className="font-bold">
-              {formatNumber(total)} {fa ? "تومان" : "Toman"}
-            </span>
-          </p>
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() =>
-              alert(
-                fa
-                  ? "پرداخت آنلاین به‌زودی فعال می‌شود. فعلاً می‌توانید از طریق مشاوره کارشناس یا فروشگاه‌های محلی سفارش دهید."
-                  : "Online checkout coming soon. For now order via expert consult or local shops."
-              )
-            }
-          >
-            {fa ? "ادامه خرید" : "Checkout"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

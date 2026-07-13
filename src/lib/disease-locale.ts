@@ -122,6 +122,9 @@ export function localizeDiseaseLabel(label: string, locale: "en" | "fa"): string
   for (const [en, fa] of TREATMENT_FA.sort((a, b) => b[0].length - a[0].length)) {
     out = out.replace(new RegExp(escapeRegExp(en), "gi"), fa);
   }
+  if (!isMostlyPersian(out) && /[A-Za-z]{4,}/.test(out)) {
+    return `مورد تشخیص‌داده‌شده (${out})`;
+  }
   return out;
 }
 
