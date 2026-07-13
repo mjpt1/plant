@@ -24,6 +24,9 @@ export const en = {
     lightMeter: "Light meter",
     consultations: "Expert help",
     premium: "Plus",
+    recommend: "Recommend",
+    assistant: "Assistant",
+    shop: "Care shop",
   },
   theme: {
     light: "Light",

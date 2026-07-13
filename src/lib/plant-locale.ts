@@ -5,6 +5,7 @@ import {
   getPersianName,
 } from "@/data/plantNames";
 import { formatBotanicalFamily } from "@/lib/botanical-family";
+import { localizeDiseaseLabels } from "@/lib/disease-locale";
 import type { PlantAnalysis } from "@/types/analysis";
 
 export type PlantNameFields = {
@@ -152,10 +153,48 @@ const EN_FA_PHRASES: [string, string][] = [
   ["by division", "با تقسیم بوته"],
   ["root rot", "پوسیدگی ریشه"],
   ["powdery mildew", "سفیدک پودری"],
+  ["downy mildew", "سفیدک دروغین"],
   ["leaf spot", "لکه برگی"],
+  ["bacterial leaf spot", "لکه باکتریایی برگ"],
   ["spider mites", "کنه تار عنکبوتی"],
   ["mealybugs", "شپشک آردی"],
   ["aphids", "شته"],
+  ["scale insects", "شپشک سپردار"],
+  ["fungus gnats", "پشه قارچ"],
+  ["whiteflies", "مگس سفید"],
+  ["thrips", "تریپس"],
+  ["nutrient deficiency", "کمبود عناصر غذایی"],
+  ["iron deficiency", "کمبود آهن"],
+  ["nitrogen deficiency", "کمبود نیتروژن"],
+  ["magnesium deficiency", "کمبود منیزیم"],
+  ["yellowing leaves", "زردی برگ‌ها"],
+  ["brown spots", "لکه‌های قهوه‌ای"],
+  ["leaf drop", "ریزش برگ"],
+  ["wilting", "پژمردگی"],
+  ["overwatering", "آبیاری بیش از حد"],
+  ["underwatering", "کم‌آبی"],
+  ["remove affected leaves", "برگ‌های آسیب‌دیده را جدا کنید"],
+  ["improve air circulation", "تهویه را بهتر کنید"],
+  ["well-aerated", "با تهویه خوب"],
+  ["peat-based", "بر پایه پیت"],
+  ["perlite", "پرلیت"],
+  ["coco coir", "کوکوپیت"],
+  ["repot every", "هر"],
+  ["growing season", "فصل رشد"],
+  ["dormant season", "فصل خواب"],
+  ["mist regularly", "به‌طور منظم غبارپاشی کنید"],
+  ["avoid cold drafts", "از باد سرد پرهیز کنید"],
+  ["keep away from heaters", "از وسایل گرمایشی دور نگه دارید"],
+  ["rotate the pot", "گلدان را بچرخانید"],
+  ["bottom watering", "آبیاری از زیر"],
+  ["top watering", "آبیاری از بالا"],
+  ["let excess water drain", "اجازه دهید آب اضافه خارج شود"],
+  ["do not let sit in water", "نگذارید در آب بماند"],
+  ["bright filtered light", "نور فیلترشده روشن"],
+  ["east-facing window", "پنجره شرقی"],
+  ["north-facing window", "پنجره شمالی"],
+  ["south-facing window", "پنجره جنوبی"],
+  ["west-facing window", "پنجره غربی"],
 ];
 
 const EN_FA_WORDS: [string, string][] = [
@@ -457,7 +496,9 @@ function localizeStringArray(
   items: string[],
   locale: Locale
 ): string[] {
-  return items.map((item) => localizePlantText(item, locale) || item);
+  return localizeDiseaseLabels(items, locale === "fa" ? "fa" : "en").map(
+    (item) => localizePlantText(item, locale) || item
+  );
 }
 
 /** Re-localize a stored or AI analysis snapshot for the active UI locale. */

@@ -41,7 +41,10 @@ type NavKey =
   | "care"
   | "lightMeter"
   | "consultations"
-  | "premium";
+  | "premium"
+  | "recommend"
+  | "assistant"
+  | "shop";
 
 type DockItem = {
   href: string;
@@ -433,6 +436,9 @@ export default function Navbar() {
                     [
                       { href: "/catalog", icon: BookOpen, key: "catalog" as const },
                       { href: "/light-meter", icon: Sun, key: "lightMeter" as const },
+                      { href: "/recommend", icon: Leaf, key: "recommend" as const },
+                      { href: "/assistant", icon: MessageCircleQuestion, key: "assistant" as const },
+                      { href: "/shop", icon: Heart, key: "shop" as const },
                       { href: "/consultations", icon: MessageCircleQuestion, key: "consultations" as const },
                       { href: "/premium", icon: BadgeCheck, key: "premium" as const },
                       ...(user

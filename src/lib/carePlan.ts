@@ -215,7 +215,9 @@ export function buildCarePlan(input: {
     titleEn: `Check repotting: ${input.plantNameEn}`,
     titleFa: `بررسی تعویض گلدان: ${input.plantNameFa}`,
     notesEn: input.careGuide?.soil || "Check if roots are crowded.",
-    notesFa: input.careGuide?.soil || "بررسی کنید ریشه‌ها شلوغ نشده باشند.",
+    notesFa:
+      localizePlantText(input.careGuide?.soil, "fa") ||
+      "بررسی کنید ریشه‌ها شلوغ نشده باشند.",
   });
 
   return { tasks, climate };
@@ -272,7 +274,7 @@ export function generateRemindersFromPlan(
             ? "monthly"
             : "monthly",
         notes: postponed
-          ? `${task.notesFa} (به‌خاطر باران به روز بعد موکول شد / postponed due to rain)`
+          ? `${task.notesFa} (به‌خاطر باران به روز بعد موکول شد)`
           : task.notesFa,
       });
 

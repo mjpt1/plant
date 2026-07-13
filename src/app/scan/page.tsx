@@ -37,6 +37,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { localizeAnalysisResult } from "@/lib/plant-locale";
 import { DiagnosisFeedbackPanel } from "@/components/scan/DiagnosisFeedbackPanel";
+import { DiseaseShopSuggestions } from "@/components/scan/DiseaseShopSuggestions";
 
 type ScanStep = "capture" | "analyzing" | "results";
 type ResultTab = "plant" | "health" | "care" | "treatment";
@@ -913,9 +914,32 @@ export default function ScanPage() {
                         <li key={i}>{d}</li>
                       ))}
                     </ul>
+                    <DiseaseShopSuggestions
+                      labels={[
+                        ...displayResult.health.diseaseDiagnosis,
+                        ...displayResult.health.pestDiagnosis,
+                      ]}
+                      locale={locale}
+                    />
                   </div>
                 )}
-                {displayResult.health.pestDiagnosis.length > 0 && (
+                {displayResult.health.pestDiagnosis.length > 0 &&
+                  displayResult.health.diseaseDiagnosis.length === 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">{t.scan.results.pests}</h4>
+                    <ul className="list-disc ps-5 text-sm space-y-1">
+                      {displayResult.health.pestDiagnosis.map((p, i) => (
+                        <li key={i}>{p}</li>
+                      ))}
+                    </ul>
+                    <DiseaseShopSuggestions
+                      labels={displayResult.health.pestDiagnosis}
+                      locale={locale}
+                    />
+                  </div>
+                )}
+                {displayResult.health.pestDiagnosis.length > 0 &&
+                  displayResult.health.diseaseDiagnosis.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2">{t.scan.results.pests}</h4>
                     <ul className="list-disc ps-5 text-sm space-y-1">

@@ -129,6 +129,24 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-2">
           <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/recommend">
+              <Sparkles className="w-4 h-4" />
+              {t.nav.recommend}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/assistant">
+              <MessageSquareHeart className="w-4 h-4" />
+              {t.nav.assistant}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/shop">
+              <Sparkles className="w-4 h-4" />
+              {t.nav.shop}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full justify-start">
             <Link href="/light-meter">
               <Gauge className="w-4 h-4" />
               {t.nav.lightMeter}

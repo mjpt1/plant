@@ -22,6 +22,8 @@ import {
   Sun,
   MessageSquareHeart,
   Sparkles,
+  Bot,
+  ShoppingBag,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -119,6 +121,9 @@ export default function DashboardPage() {
     { href: "/catalog", icon: BookOpen, label: t.dashboard.actions.browse, color: "from-lime-500 to-emerald-600" },
     { href: "/calendar", icon: Calendar, label: t.dashboard.actions.calendar, color: "from-green-500 to-teal-600" },
     { href: "/light-meter", icon: Sun, label: t.nav.lightMeter, color: "from-amber-400 to-orange-500" },
+    { href: "/recommend", icon: Sparkles, label: t.nav.recommend, color: "from-lime-400 to-emerald-500" },
+    { href: "/assistant", icon: Bot, label: t.nav.assistant, color: "from-sky-400 to-blue-500" },
+    { href: "/shop", icon: ShoppingBag, label: t.nav.shop, color: "from-teal-400 to-cyan-600" },
     { href: "/consultations", icon: MessageSquareHeart, label: t.nav.consultations, color: "from-rose-400 to-pink-500" },
     { href: "/premium", icon: Sparkles, label: t.nav.premium, color: "from-violet-400 to-fuchsia-500" },
   ];

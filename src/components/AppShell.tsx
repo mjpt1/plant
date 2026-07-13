@@ -15,6 +15,9 @@ import {
   BadgeCheck,
   Leaf,
   Sun,
+  Bot,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -23,10 +26,13 @@ import { cn } from "@/lib/utils";
 const sidebarItems = [
   { href: "/dashboard", icon: LayoutDashboard, key: "dashboard" as const },
   { href: "/scan", icon: Camera, key: "scan" as const },
+  { href: "/assistant", icon: Bot, key: "assistant" as const },
   { href: "/plants", icon: Sprout, key: "myPlants" as const },
   { href: "/catalog", icon: BookOpen, key: "catalog" as const },
+  { href: "/recommend", icon: Sparkles, key: "recommend" as const },
   { href: "/calendar", icon: Calendar, key: "calendar" as const },
   { href: "/light-meter", icon: Sun, key: "lightMeter" as const },
+  { href: "/shop", icon: ShoppingBag, key: "shop" as const },
   { href: "/consultations", icon: MessageCircleQuestion, key: "consultations" as const },
 ];
 

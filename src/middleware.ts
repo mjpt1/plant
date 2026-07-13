@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   "/expert",
   "/catalog/add",
   "/consultations",
+  "/assistant",
 ] as const;
 
 const AUTH_PAGES = ["/auth/login", "/auth/register", "/auth"] as const;
@@ -87,6 +88,8 @@ export const config = {
     "/expert/:path*",
     "/consultations",
     "/consultations/:path*",
+    "/assistant",
+    "/assistant/:path*",
     "/catalog/add",
     "/catalog/add/:path*",
     "/auth/login",

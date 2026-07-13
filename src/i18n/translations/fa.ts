@@ -26,6 +26,9 @@ export const fa: TranslationKeys = {
     lightMeter: "لایت‌متر",
     consultations: "مشاوره کارشناس",
     premium: "پلاس",
+    recommend: "پیشنهاد گیاه",
+    assistant: "دستیار",
+    shop: "فروشگاه مراقبت",
   },
   theme: {
     light: "روشن",

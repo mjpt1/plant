@@ -14,7 +14,9 @@ import {
   localizePlantName,
   localizePlantText,
   localizeEnumValue,
+  localizeAnalysisResult,
 } from "@/lib/plant-locale";
+import { localizeDiseaseLabels, localProductHintsForLabels } from "@/lib/disease-locale";
 import {
   getHeuristicHealthAssessment,
   needsVisualHealthAssessment,
@@ -369,7 +371,8 @@ function buildAnalysisFromCatalog(
       health: {
         status: "unknown",
         possibleProblems: [],
-        diseaseDiagnosis:
+        diseaseDiagnosis: [],
+        pestDiagnosis:
           imageType === "pest"
             ? [
                 fa
@@ -377,7 +380,6 @@ function buildAnalysisFromCatalog(
                   : "Take a closer photo of leaves or stems for pest diagnosis.",
               ]
             : [],
-        pestDiagnosis: [],
         soilAnalysis:
           imageType === "soil"
             ? fa
@@ -497,11 +499,14 @@ Return ONLY valid JSON (no markdown):
 }
 
 Critical rules:
-- diseaseDiagnosis: ONLY specific pathology you can see (fungal spots, rot, mosaic virus, bacterial ooze, etc.)
+- diseaseDiagnosis: ONLY specific pathology you can see (fungal spots, rot, mosaic virus, bacterial ooze, rust, powdery mildew, anthracnose, etc.)
+- pestDiagnosis: named pests only (aphids, mealybugs, spider mites, thrips, scale, fungus gnats, whiteflies)
 - NEVER put generic watering advice in diseaseDiagnosis (no "underwatering", "overwatering", "کم آبی", "آبیاری کم", "کمبود آب" unless crisp dry soil + wilt are clearly visible)
 - possibleProblems may include watering/light/nutrient suspects as hypotheses, not confirmed diseases
 - If the plant looks healthy, status="healthy" and leave diagnosis arrays empty
-- Be conservative: when unsure, use status="unknown" rather than guessing`;
+- Be conservative: when unsure, use status="unknown" rather than guessing
+- Prefer common houseplant pathologies seen in Middle East / Iran apartments (low light, overwatering, powdery mildew, mealybugs, spider mites, root rot)
+- treatment.stepByStepPlan: concrete actions a home gardener can do this week; mention widely available products when relevant (insecticidal soap, neem oil, copper fungicide / Bordeaux, balanced NPK) without inventing brand claims`;
 
 function buildHealthPrompt(
   imageType?: string,
@@ -518,12 +523,16 @@ function buildHealthPrompt(
     : "";
   const langHint =
     locale === "fa"
-      ? "Write all text values in Persian (Farsi)."
+      ? "Write ALL human-readable string values in Persian (Farsi). Keep scientific binomials in Latin. Disease and pest names must be Persian common names (e.g. سفیدک پودری، پوسیدگی ریشه، شپشک آردی)."
       : "Write all text values in English.";
   const plantHint = plantContext?.scientificName
     ? `Known plant: ${plantContext.commonName} (${plantContext.scientificName}), family ${plantContext.family}, category ${plantContext.category}.`
     : "";
-  return `${HEALTH_ANALYSIS_PROMPT}\n${typeHint}\n${plantHint}\n${langHint}`;
+  const focusHint =
+    imageType === "leaf" || imageType === "pest" || imageType === "stem"
+      ? "Prioritize visible lesions, mold, pests, and tissue damage over species trivia."
+      : "";
+  return `${HEALTH_ANALYSIS_PROMPT}\n${typeHint}\n${plantHint}\n${focusHint}\n${langHint}`;
 }
 
 const healthOnlySchema = z.object({
@@ -758,7 +767,11 @@ async function enrichWithHealthAnalysis(
     });
     if (disease.used) {
       const fa = locale === "fa";
-      const labels = disease.labels.map((l) => l.label);
+      const lang = fa ? "fa" : "en";
+      const labels = localizeDiseaseLabels(
+        disease.labels.map((l) => l.label),
+        lang
+      );
       working = withMeta(
         {
           ...base,
@@ -841,17 +854,42 @@ async function enrichWithHealthAnalysis(
       );
     }
 
-    // Prefer disease-model labels when present; let LLM fill treatment/explanation.
+    // Prefer LLM disease names (localized); keep CNN as secondary signal in meta.
     if (working.meta?.diseaseModelUsed && working.health.diseaseDiagnosis.length > 0) {
+      const lang = locale === "fa" ? "fa" : "en";
+      const modelLabels = localizeDiseaseLabels(
+        working.health.diseaseDiagnosis,
+        lang
+      );
+      const llmLabels = sanitizeDiseaseLabels(
+        healthResult.health.diseaseDiagnosis || []
+      );
+      const mergedLabels =
+        llmLabels.length > 0
+          ? Array.from(new Set([...llmLabels, ...modelLabels])).slice(0, 5)
+          : modelLabels;
+      const hints = localProductHintsForLabels(
+        [...mergedLabels, ...(healthResult.health.pestDiagnosis || [])],
+        lang
+      );
       healthResult = {
         ...healthResult,
         health: {
           ...healthResult.health,
-          diseaseDiagnosis: working.health.diseaseDiagnosis,
+          diseaseDiagnosis: mergedLabels,
           confidence: Math.max(
             healthResult.health.confidence,
             working.health.confidence
           ),
+        },
+        treatment: {
+          ...healthResult.treatment,
+          stepByStepPlan: Array.from(
+            new Set([
+              ...(healthResult.treatment.stepByStepPlan || []),
+              ...hints,
+            ])
+          ).slice(0, 8),
         },
       };
       const merged = mergeHealthAnalysis(working, healthResult, "disease_model");
@@ -861,6 +899,29 @@ async function enrichWithHealthAnalysis(
         diseaseModelUsed: true,
         diseaseModelLabels: working.meta?.diseaseModelLabels || [],
       });
+    }
+
+    const lang = locale === "fa" ? "fa" : "en";
+    const hints = localProductHintsForLabels(
+      [
+        ...(healthResult.health.diseaseDiagnosis || []),
+        ...(healthResult.health.pestDiagnosis || []),
+      ],
+      lang
+    );
+    if (hints.length) {
+      healthResult = {
+        ...healthResult,
+        treatment: {
+          ...healthResult.treatment,
+          stepByStepPlan: Array.from(
+            new Set([
+              ...(healthResult.treatment.stepByStepPlan || []),
+              ...hints,
+            ])
+          ).slice(0, 8),
+        },
+      };
     }
 
     return mergeHealthAnalysis(working, healthResult, "vision");
@@ -1186,8 +1247,13 @@ export async function analyzePlantImage(
   mimeType: string,
   options?: { imageType?: string; locale?: string }
 ): Promise<PlantAnalysis> {
+  const locale = (options?.locale === "en" ? "en" : "fa") as Locale;
+
+  const finalize = (analysis: PlantAnalysis) =>
+    localizeAnalysisResult(analysis, locale);
+
   if (!hasAnalysisConfigured()) {
-    return getUnconfiguredAnalysis(options?.locale);
+    return finalize(getUnconfiguredAnalysis(options?.locale));
   }
 
   const preferPlantNet =
@@ -1196,28 +1262,34 @@ export async function analyzePlantImage(
     (!hasLlmAnalysisConfigured() && !!getPlantNetApiKey());
 
   if (preferPlantNet && getPlantNetApiKey()) {
-    return analyzeWithPlantNet(
-      base64Image,
-      mimeType,
-      options?.imageType,
-      options?.locale
-    );
-  }
-
-  try {
-    return await analyzeWithLlm(
-      base64Image,
-      mimeType,
-      options?.imageType,
-      options?.locale
-    );
-  } catch {
-    if (getPlantNetApiKey()) {
-      return analyzeWithPlantNet(
+    return finalize(
+      await analyzeWithPlantNet(
         base64Image,
         mimeType,
         options?.imageType,
         options?.locale
+      )
+    );
+  }
+
+  try {
+    return finalize(
+      await analyzeWithLlm(
+        base64Image,
+        mimeType,
+        options?.imageType,
+        options?.locale
+      )
+    );
+  } catch {
+    if (getPlantNetApiKey()) {
+      return finalize(
+        await analyzeWithPlantNet(
+          base64Image,
+          mimeType,
+          options?.imageType,
+          options?.locale
+        )
       );
     }
     throw new Error("Plant analysis failed");

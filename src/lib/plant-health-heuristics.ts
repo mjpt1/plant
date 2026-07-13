@@ -73,13 +73,26 @@ const HINTS: Record<
 function pickCategoryKey(category?: string): string {
   if (!category) return "default";
   const c = category.toLowerCase();
-  if (c.includes("succulent") || c.includes("cactus")) return "succulent";
-  if (c.includes("herb")) return "herb";
+  if (
+    c.includes("succulent") ||
+    c.includes("cactus") ||
+    c.includes("ساکولنت") ||
+    c.includes("کاکتوس")
+  ) {
+    return "succulent";
+  }
+  if (c.includes("herb") || c.includes("سبزی") || c.includes("دارویی")) {
+    return "herb";
+  }
   if (
     c.includes("house") ||
     c.includes("indoor") ||
     c.includes("flower") ||
-    c.includes("vine")
+    c.includes("vine") ||
+    c.includes("آپارتمان") ||
+    c.includes("زینتی") ||
+    c.includes("گل") ||
+    c.includes("خانگی")
   ) {
     return "houseplant";
   }
